@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Экологический профиль региона</title>
+    <meta name="description" content="Экологическое состояние Брянской области: воздух, вода, загрязнения, карта и рекомендации." />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <style>
+        /* Режимы: сначала показываем экологию (зелёный), по кнопке переключаем на историю */
+        body.mode-eco .mode-history { display: none !important; }
+        body.mode-eco .mode-eco { display: block !important; }
+
+        body.mode-history .mode-eco { display: none !important; }
+        body.mode-history .mode-history { display: block !important; }
+
+        /* Компактная кнопка переключения (в стиле шапки) */
+        .mode-toggle {
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--muted);
+            border-radius: 999px;
+            padding: 6px 10px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .mode-toggle:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text);
+            border-color: var(--accent);
+        }
+        .mode-toggle-badge {
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 800;
+        }
+        body.mode-history { --accent: #f59e0b; }
+        body.mode-history .mode-toggle-badge {
+            background: rgba(245, 158, 11, 0.12);
+            border-color: rgba(245, 158, 11, 0.25);
+            color: #fde68a;
+        }
+
+        /* Сетка карточек для истории/заводов */
+        .grid-auto {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+        .history-stat-card { text-align: center; }
+        .history-stat-value { font-size: 2.1rem; font-weight: 800; color: var(--accent); line-height: 1.1; }
+        .history-stat-label { font-size: 14px; color: var(--muted); margin-top: 10px; line-height: 1.45; }
+        .history-chart-card .history-chart-wrap {
+            position: relative;
+            height: 240px;
+            width: 100%;
+        }
+        @media (max-width: 720px) {
+            .history-chart-card .history-chart-wrap { height: 200px; }
+        }
+        body.mode-history .history-knowledge .history-hero {
+            text-align: center;
+            padding: 28px 22px 20px;
+            margin-bottom: 8px;
+            border-radius: 20px;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            background: linear-gradient(145deg, rgba(245, 158, 11, 0.1), rgba(16, 185, 129, 0.05));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+        body.mode-history .history-knowledge .history-hero .lead { max-width: 760px; margin: 0 auto; }
+        body.mode-history .history-h2 {
+            font-size: 24px;
+            margin: 36px 0 0;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(245, 158, 11, 0.28);
+        }
+        body.mode-history .history-card-accent {
+            border-color: rgba(245, 158, 11, 0.3);
+            background: linear-gradient(160deg, rgba(18, 23, 21, 0.98), rgba(23, 29, 27, 0.99));
+        }
+        body.mode-history .history-card-wide {
+            border-color: rgba(245, 158, 11, 0.22);
+            background: linear-gradient(165deg, var(--panel), var(--panel-2));
+        }
+        body.mode-history .knowledge-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        body.mode-history .knowledge-table th,
+        body.mode-history .knowledge-table td {
+            padding: 12px 14px;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+        body.mode-history .knowledge-table th {
+            background: rgba(245, 158, 11, 0.12);
+            color: #fde68a;
+            font-weight: 700;
+        }
+        body.mode-history .knowledge-table tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+        body.mode-history .knowledge-table .num { text-align: right; }
+        body.mode-history .timeline-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        body.mode-history .timeline-list li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 14px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        body.mode-history .timeline-list li:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        body.mode-history .timeline-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 7px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #f59e0b;
+        }
+        body.mode-history .timeline-list .year { font-weight: 700; color: #fde68a; margin-right: 8px; }
+        body.mode-history .chart-wrap {
+            height: 260px;
+            margin-top: 12px;
+            position: relative;
+        }
+    </style>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#10b981" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+</head>
+<body class="page-home mode-eco">
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <a href="index.html" class="logo" aria-hidden="true" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">🌿</a>
+                <div>
+                    <h1>Экологический профиль региона</h1>
+                    <p class="tagline">Обзор · Личный вклад · Сравнение</p>
+                </div>
+            </div>
+            <nav class="nav">
+                <a href="overview.html" class="nav-link">Обзор</a>
+                <a href="personal.html" class="nav-link">Личный вклад</a>
+                <a href="comparison.html" class="nav-link">Сравнение</a>
+                <a href="news.html" class="nav-link">Новости</a>
+                <button id="modeToggle" class="mode-toggle" type="button" aria-label="Переключить режим">
+                    <span id="modeToggleMain">Экология</span>
+                    <span id="modeToggleBadge" class="mode-toggle-badge">История</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Главная: информация о регионе и обзор сайта -->
+        <section class="section hero reveal mode-eco">
+            <div class="container">
+                <h2><span class="icon icon-leaf" aria-hidden="true">🌿</span> Экологический профиль 32 региона</h2>
+                <p class="lead" style="max-width: 800px; margin: 0 auto 24px;">
+                    Брянская область — приграничный лесной регион с густой речной сетью, промышленными центрами и
+                    уникальными природными территориями. Заповедные леса «Брянского леса», поймы Десны и крупных притоков
+                    соседствуют с промышленными зонами Брянска, Дятькова, Клинцов и других городов.
+                </p>
+                <p>
+                    Проект «Экологический профиль региона» — <strong>единая точка входа</strong> для жителей, школьников,
+                    специалистов и органов власти: данные о воздухе, воде, загрязнённых территориях и природоохранных инициативах.
+                </p>
+                <div class="section-quick grid-2" style="margin-top: 32px; gap: 20px;">
+                    <a href="overview.html" class="card card-link">
+                        <h3>📊 Обзор</h3>
+                        <p class="muted" style="margin: 0;">Графики, карта, показатели, глоссарий, зелёные точки, обратная связь.</p>
+                    </a>
+                    <a href="#history-knowledge" class="card card-link">
+                        <h3>🎖️ История</h3>
+                        <p class="muted" style="margin: 0;">В режиме «История»: хроника, Чернобыль и Брянщина, реки, экогерои.</p>
+                    </a>
+                    <a href="personal.html" class="card card-link">
+                        <h3>🧩 Личный вклад</h3>
+                        <p class="muted" style="margin: 0;">Экокалькулятор, экотесты и самопроверка, трекер привычек, сообщить о нарушении.</p>
+                    </a>
+                    <a href="comparison.html" class="card card-link">
+                        <h3>📈 Сравнение</h3>
+                        <p class="muted" style="margin: 0;">Брянская область и соседние регионы в графиках и таблицах.</p>
+                    </a>
+                </div>
+                <p style="margin-top: 24px; text-align: center;">
+                    <a href="news.html" style="color: var(--accent); font-weight: 600;">Новости и календарь экособытий →</a>
+                </p>
+            </div>
+        </section>
+
+        <section class="section reveal mode-eco">
+            <div class="container grid-2">
+                <div class="card">
+                    <h3>Экологический портрет региона</h3>
+                    <p>
+                        Брянская область расположена на стыке лесной и лесостепной зон. Более трети территории занимают леса,
+                        значительную часть составляют поймы рек Десны, Болвы, Навли и их притоков. Через регион проходят важные
+                        транспортные коридоры, развиты металлургия, машиностроение, стекольная и пищевая промышленность.
+                    </p>
+                    <p>
+                        Такое соседство природы и промышленности делает регион <strong>особенно чувствительным</strong> к
+                        экологическим решениям. Именно поэтому важны прозрачные данные о состоянии воздуха и воды,
+                        открытая информация о промышленных выбросах и удобные сервисы для жителей.
+                    </p>
+                    <p>
+                        Сайт помогает ответить на простой вопрос: <strong>«Где в Брянской области чисто, а где есть проблемы — и что с этим можно сделать?»</strong>
+                    </p>
+                </div>
+                <div class="card">
+                    <h3>Какие вызовы стоят перед областью</h3>
+                    <ul class="highlights">
+                        <li><strong>Наследие техногенных воздействий</strong> — промышленные площадки, старые полигоны, локальные свалки.</li>
+                        <li><strong>Транспортная нагрузка</strong> — высокий трафик на кольцевых дорогах и в промышленных районах.</li>
+                        <li><strong>Качество воды</strong> — состояние малых рек и сельских водозаборов требует постоянного контроля.</li>
+                        <li><strong>Информационный дефицит</strong> — жителям сложно быстро найти, куда сдать отходы или пожаловаться на нарушение.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal mode-eco">
+            <div class="container">
+                <h2><span class="icon icon-map" aria-hidden="true">♻️</span> Что уже можно найти на сайте</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Карта «Зелёные точки»</h3>
+                        <p>
+                            На интерактивной карте в разделе «Обзор» планируется отдельный слой с пунктами приёма вторсырья:
+                            стекла, пластика, макулатуры, батареек и одежды. Для начала мы выделяем несколько демонстрационных
+                            «зелёных точек» Брянска:
+                        </p>
+                        <ul class="highlights">
+                            <li><strong>Пункт приёма вторсырья в центре города</strong> — стекло, пластик, бумага.</li>
+                            <li><strong>Эко‑контейнер у крупного супермаркета</strong> — батарейки и мелкая техника.</li>
+                            <li><strong>Благотворительный пункт сбора одежды</strong> — вещи хорошего состояния.</li>
+                        </ul>
+                        <p class="muted">
+                            В дальнейшем список «зелёных точек» может пополняться за счёт данных из 2ГИС, соцсетей и опросов жителей.
+                        </p>
+                    </div>
+                    <div class="card">
+                        <h3>Экогерои Брянщины</h3>
+                        <p>
+                            Истории экогероев собраны в <strong>режиме «История»</strong> на главной странице.
+                        </p>
+                        <ul class="highlights">
+                            <li><strong>Учитель биологии</strong>, который каждый год выводит класс на уборку берегов Десны.</li>
+                            <li><strong>Команда школьников</strong>, собравшая сотни килограммов батареек и организовавшая пункт приёма.</li>
+                            <li><strong>Волонтёр‑эколог</strong>, создавший карту свалок и помогший закрыть несколько из них.</li>
+                        </ul>
+                        <p class="muted">
+                            Формат: короткая история, фото и понятный результат — сколько собрано отходов, сколько деревьев посажено и т.п.
+                        </p>
+                    </div>
+                </div>
+                <div class="card" style="margin-top: 24px;">
+                    <h3>Календарь экологических событий</h3>
+                    <p>
+                        Экологические праздники и акции собраны в виде календаря: от Дня Земли и Дня Волги до локальных
+                        субботников и лекций. Для школ и кружков это готовая сетка дат для уроков, проектов и мероприятий.
+                    </p>
+                    <p class="muted">
+                        Подробный календарь уже реализован во вкладке «Новости» — там можно смотреть даты, темы и идеи для проведения акций.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal mode-eco">
+            <div class="container">
+                <h2><span class="icon icon-idea" aria-hidden="true">🚀</span> Как будет развиваться платформа</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Экспертный уровень</h3>
+                        <ul class="highlights">
+                            <li><strong>Карточки предприятий</strong> с описанием производства, выбросов и мер по экологии.</li>
+                            <li><strong>Раздел «Открытые данные»</strong> с таблицами загрязнений, выбросов и качества воды (CSV/Excel).</li>
+                            <li><strong>Расширенный глоссарий</strong> с понятным объяснением сложных терминов (PM2.5, БПК<sub>5</sub>, VOC, ЛВЖ и др.).</li>
+                            <li><strong>Экологический рейтинг районов</strong> с таблицами, иконками и динамикой показателей.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Вовлечение жителей</h3>
+                        <ul class="highlights">
+                            <li><strong>Форма «Сообщи о нарушении»</strong> — имя, фото, геолокация и описание проблемы.</li>
+                            <li><strong>Истории «Было / Стало»</strong> — наглядные примеры уборок, посадок и восстановлений.</li>
+                            <li><strong>Эко‑блог</strong> с лонгридами «История одной свалки» или «История одной реки».</li>
+                            <li><strong>Краудсорсинг данных</strong> — метки свалок, пунктов приёма отходов и редких видов на карте.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal mode-eco">
+            <div class="container">
+                <h2><span class="icon" aria-hidden="true">🌍</span> Экологическое состояние региона</h2>
+                <div class="grid-auto" style="margin-top: 18px;">
+                    <div class="card">
+                        <h3>Воздух</h3>
+                        <ul class="highlights">
+                            <li>Зоны влияния промышленных районов и транспортных магистралей.</li>
+                            <li>Демо-направления: PM2.5, PM10, NO₂, SO₂.</li>
+                            <li>Что улучшает ситуацию: модернизация газоочистки и контроль выбросов.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Вода</h3>
+                        <ul class="highlights">
+                            <li>Оценка качества по мутности, нитратам, БПК₅ и pH.</li>
+                            <li>Наиболее уязвимы участки малых рек и водозаборов.</li>
+                            <li>Приоритет: очистные сооружения и снижение сбросов.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Отходы</h3>
+                        <ul class="highlights">
+                            <li>Фокус на снижении объёма отходов и росте переработки.</li>
+                            <li>Демо-решения: раздельный сбор, рекультивация, контроль полигонов.</li>
+                            <li>Роль жителей: «зелёные точки» и информирование о нарушениях.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Почвы и полигоны</h3>
+                        <ul class="highlights">
+                            <li>Наследие старых полигонов и несанкционированных свалок.</li>
+                            <li>Что важно: мониторинг и мероприятия по рекультивации.</li>
+                            <li>Доп. направление: профилактика новых загрязнений.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 24px;">
+                    <h3>Карта экологических объектов</h3>
+                    <p class="muted" style="margin-top: -6px;">
+                        Демо-карта: парки, ООПТ, посты мониторинга, «зелёные» точки и природные объекты — больше меток для ориентира.
+                    </p>
+                    <div id="ecoMap" class="map" style="height: 420px; margin-top: 16px;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ИСТОРИЯ: материалы и хронология региона -->
+        <section class="section reveal mode-history history-knowledge" id="history-knowledge">
+            <div class="container">
+                <div class="history-hero">
+                    <h2><span class="icon icon-idea" aria-hidden="true">🎖️</span> История экологии Брянщины</h2>
+                    <p class="lead">
+                        История региона, ключевые даты и факты — в режиме «История». Материал объединён с хроникой последствий Чернобыля,
+                        графиками и справочными таблицами для учебных проектов.
+                    </p>
+                </div>
+
+                <div class="grid-2 history-panel">
+                    <div class="card history-card-accent">
+                        <h3>Исторические факты</h3>
+                        <ul class="highlights">
+                            <li><strong>Индустриализация XX века</strong> — рост промышленных предприятий в Брянске, Дятьково, Клинцах.</li>
+                            <li><strong>Чернобыльская авария (1986)</strong> — радиоактивное загрязнение юго‑западных районов области, мониторинг почв и лесов.</li>
+                            <li><strong>Создание ООПТ</strong> — национальный парк «Брянский лес» и другие особо охраняемые территории.</li>
+                            <li><strong>Современные программы</strong> — рекультивация свалок, природоохранные проекты, экопросвещение.</li>
+                        </ul>
+                    </div>
+                    <div class="card history-card-accent">
+                        <h3>Хроника событий</h3>
+                        <ul class="highlights">
+                            <li><strong>1986</strong> — последствия Чернобыля, начало системного мониторинга загрязнения.</li>
+                            <li><strong>1995–2000</strong> — первые региональные экологические программы и отчёты.</li>
+                            <li><strong>2010+</strong> — развитие мониторинга воздуха и воды, открытые данные.</li>
+                            <li><strong>2020+</strong> — рост волонтёрских движений, школьных и молодёжных экопроектов.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2 class="history-h2"><span class="icon icon-idea" aria-hidden="true">☢️</span> Чернобыль и Брянщина</h2>
+                <p class="muted" style="margin-bottom: 24px;">
+                    26 апреля 1986 года авария на Чернобыльской АЭС привела к выбросу радионуклидов. Брянская область оказалась одним из наиболее пострадавших регионов России: радиоактивные осадки затронули в основном юго-западные районы.
+                </p>
+                <div class="grid-2 history-panel">
+                    <div class="card history-card-accent">
+                        <h3>Как это повлияло на регион</h3>
+                        <ul class="highlights">
+                            <li>Загрязнение почвы цезием-137 и стронцием-90 в десятках населённых пунктов.</li>
+                            <li>Ограничения на использование лесной продукции (грибы, ягоды) и сельхозземель.</li>
+                            <li>Создание зон контроля и программ мониторинга здоровья населения.</li>
+                            <li>С 1990‑х годов — систематические замеры, карты загрязнения, реабилитация территорий.</li>
+                        </ul>
+                    </div>
+                    <div class="card history-card-accent">
+                        <h3>Хронология</h3>
+                        <ul class="timeline-list">
+                            <li><span class="year">1986</span> — авария на ЧАЭС, выпадение радионуклидов на юго-запад Брянской области.</li>
+                            <li><span class="year">1986–1991</span> — первые зоны отчуждения и ограничений, переселение части населённых пунктов.</li>
+                            <li><span class="year">1990‑е</span> — создание региональных программ радиационного мониторинга и реабилитации.</li>
+                            <li><span class="year">2000‑е — н.в.</span> — снижение плотности загрязнения за счёт распада изотопов, продолжение контроля.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card history-card-wide" style="margin-top: 24px;">
+                    <h3>Районы Брянской области, наиболее пострадавшие от чернобыльских выпадений</h3>
+                    <p class="muted" style="margin-bottom: 16px;">По данным радиационного мониторинга (сводные показатели по зонам загрязнения).</p>
+                    <div style="overflow-x: auto;">
+                        <table class="knowledge-table">
+                            <thead>
+                                <tr>
+                                    <th>Район</th>
+                                    <th class="num">Населённых пунктов в зоне контроля</th>
+                                    <th>Особенности</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Климовский</td>
+                                    <td class="num">более 30</td>
+                                    <td>Наибольшая плотность загрязнения в области, зоны с ограничениями</td>
+                                </tr>
+                                <tr>
+                                    <td>Новозыбковский</td>
+                                    <td class="num">более 20</td>
+                                    <td>Город Новозыбков в зоне контроля, мониторинг продукции</td>
+                                </tr>
+                                <tr>
+                                    <td>Злынковский</td>
+                                    <td class="num">более 15</td>
+                                    <td>Лесные и сельхозугодья под постоянным контролем</td>
+                                </tr>
+                                <tr>
+                                    <td>Клинцовский</td>
+                                    <td class="num">часть населённых пунктов</td>
+                                    <td>Локальные пятна загрязнения, контроль молока и грибов</td>
+                                </tr>
+                                <tr>
+                                    <td>Красногорский</td>
+                                    <td class="num">часть населённых пунктов</td>
+                                    <td>Реабилитационные мероприятия, агрохимические работы</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h2 class="history-h2"><span class="icon icon-idea" aria-hidden="true">📈</span> Ключевые показатели и даты</h2>
+                <div class="grid-2 history-panel">
+                    <div class="card history-chart-card">
+                        <h3>Динамика площади ООПТ (тыс. га, демо)</h3>
+                        <p class="muted" style="font-size: 13px; margin-bottom: 8px;">Условные данные по годам — рост доли охраняемых территорий.</p>
+                        <div class="chart-wrap"><canvas id="knowledgeChartOopt" height="240" aria-label="График ООПТ"></canvas></div>
+                    </div>
+                    <div class="card history-card-accent">
+                        <h3>Важные экологические даты в истории области</h3>
+                        <div style="overflow-x: auto;">
+                            <table class="knowledge-table">
+                                <thead>
+                                    <tr>
+                                        <th>Год</th>
+                                        <th>Событие</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>1986</td><td>Чернобыльская авария, начало радиационного мониторинга</td></tr>
+                                    <tr><td>1987</td><td>Образование заповедника «Брянский лес»</td></tr>
+                                    <tr><td>1995</td><td>Первые региональные экологические программы</td></tr>
+                                    <tr><td>2000</td><td>Расширение сети постов наблюдения за воздухом и водой</td></tr>
+                                    <tr><td>2010</td><td>Национальный парк «Орловское Полесье» (соседний регион), усиление сотрудничества</td></tr>
+                                    <tr><td>2020+</td><td>Рекультивация свалок, проекты по раздельному сбору</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="history-h2" id="ecogeroi"><span class="icon icon-idea" aria-hidden="true">🌟</span> Экогерои Брянщины</h2>
+                <p class="muted" style="margin-bottom: 20px;">Короткие истории о людях, которые делают регион чище.</p>
+                <div class="grid-2 history-panel">
+                    <div class="card history-card-accent">
+                        <h3>Учитель‑наставник</h3>
+                        <p>
+                            Учитель биологии каждый год организует уборку берегов Десны и высадку деревьев с учениками.
+                            За несколько лет класс собрал десятки мешков мусора и заложил «зелёную аллею» у школы.
+                        </p>
+                        <p class="muted" style="margin-top: 8px; font-size: 13px;">Результат: сотни высаженных деревьев, регулярные субботники.</p>
+                    </div>
+                    <div class="card history-card-accent">
+                        <h3>Команда школьников</h3>
+                        <p>
+                            Старшеклассники создали карту точек приёма батареек и организовали сбор опасных отходов в районе.
+                            За год собрали сотни килограммов батареек и сдали их на переработку.
+                        </p>
+                        <p class="muted" style="margin-top: 8px; font-size: 13px;">Результат: сотни кг батареек сдано на утилизацию.</p>
+                    </div>
+                    <div class="card history-card-accent">
+                        <h3>Волонтёр‑эколог</h3>
+                        <p>
+                            Активист создал карту свалок и помог инициировать закрытие нескольких несанкционированных объектов.
+                            Координирует субботники и привлекает местные власти к рекультивации.
+                        </p>
+                        <p class="muted" style="margin-top: 8px; font-size: 13px;">Результат: несколько свалок ликвидировано при участии жителей.</p>
+                    </div>
+                    <div class="card history-card-accent">
+                        <h3>Семья‑сортировщики</h3>
+                        <p>
+                            Семья из Брянска несколько лет ведёт раздельный сбор и сдаёт вторсырьё в пункты приёма.
+                            Делится опытом в соцсетях и соседями — десятки семей подключились к сортировке.
+                        </p>
+                        <p class="muted" style="margin-top: 8px; font-size: 13px;">Результат: тонны сданного вторсырья, рост числа участников.</p>
+                    </div>
+                </div>
+
+                <h2 class="history-h2"><span class="icon icon-idea" aria-hidden="true">💧</span> Основные реки и водоёмы</h2>
+                <p class="muted" style="margin-bottom: 20px;">Крупнейшие водные объекты региона и их значение для экологии и хозяйства.</p>
+                <div class="card history-card-wide">
+                    <div style="overflow-x: auto;">
+                        <table class="knowledge-table">
+                            <thead>
+                                <tr>
+                                    <th>Водный объект</th>
+                                    <th>Тип</th>
+                                    <th>Краткая характеристика</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Десна</td><td>Река</td><td>Главная река области, приток Днепра; водозаборы, рекреация, судоходство</td></tr>
+                                <tr><td>Болва</td><td>Река</td><td>Крупный приток Десны, промышленные центры в бассейне</td></tr>
+                                <tr><td>Навля</td><td>Река</td><td>Приток Десны, лесные массивы, малые ГЭС в прошлом</td></tr>
+                                <tr><td>Снов</td><td>Река</td><td>Приток Десны, юго-запад области</td></tr>
+                                <tr><td>Озеро Круглое</td><td>Озеро</td><td>Природный водоём, зона отдыха, мониторинг качества воды</td></tr>
+                                <tr><td>Национальный парк «Брянский лес»</td><td>ООПТ</td><td>Водоохранные зоны, малые реки и родники</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h2 class="history-h2"><span class="icon icon-idea" aria-hidden="true">💡</span> Знаете ли вы?</h2>
+                <p class="muted" style="margin-bottom: 20px;">Короткие факты об экологии Брянщины и полезные цифры.</p>
+                <div class="grid-2 history-panel">
+                    <div class="card history-card-accent">
+                        <h3>Лесной край</h3>
+                        <p>Более 30% территории Брянской области занимают леса. Национальный парк «Брянский лес» — одна из ключевых ООПТ центральной России.</p>
+                    </div>
+                    <div class="card history-card-accent">
+                        <h3>Десна</h3>
+                        <p>Главная река области — Десна, приток Днепра. Длина в пределах региона — около 500 км. Водосбор — источник питьевой воды и зона рекреации.</p>
+                    </div>
+                    <div class="card history-card-accent">
+                        <h3>Радиационный мониторинг</h3>
+                        <p>После 1986 года в области действует сеть постов наблюдения за содержанием радионуклидов в почве, воде и продукции.</p>
+                    </div>
+                    <div class="card history-card-accent">
+                        <h3>Вторсырьё</h3>
+                        <p>В Брянске и области появляются пункты приёма стекла, пластика, макулатуры и батареек. Актуальный список — в разделе «Личный вклад».</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+<section class="section reveal mode-history">
+            <div class="container">
+                <h2><span class="icon" aria-hidden="true">🗺️</span> Карта важных мест (исторический профиль)</h2>
+                <div class="card" style="margin-top: 18px;">
+                    <p class="muted" style="margin-top: -6px;">
+                        Упрощённая демо-карта: маркеры ключевых типов мест. Можно заменить координаты и добавить слои под ваш материал.
+                    </p>
+                    <div id="historyMap" class="map" style="height: 420px; margin-top: 16px;"></div>
+                    <div class="muted" style="font-size: 13px; margin-top: 12px;">
+                        Подсказка: в реальном проекте сюда можно добавить отдельные слои для зон, мемориалов, музеев и архивов.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal mode-history">
+            <div class="container">
+                <h2><span class="icon" aria-hidden="true">🎖️</span> Стенд памяти и чести героям</h2>
+                <p class="muted" style="margin-top: -6px;">
+                    Карточки героев — демо. Заполните реальные имена, годы жизни и краткие биографии из вашего списка.
+                </p>
+
+                <div class="grid-auto" style="margin-top: 18px;" id="heroesGrid"></div>
+            </div>
+        </section>
+
+        <!-- Кнопка для открытия боковой панели документации -->
+        <button id="docSidebarToggle" class="doc-sidebar-toggle" aria-label="Открыть документацию">
+            <span>📖</span>
+            <span class="doc-toggle-label">Документация</span>
+        </button>
+
+        <!-- Боковая панель документации -->
+        <div id="docSidebar" class="doc-sidebar">
+            <div class="doc-sidebar-header">
+                <h2>📖 Документация проекта</h2>
+                <button id="docSidebarClose" class="doc-sidebar-close" aria-label="Закрыть">×</button>
+            </div>
+            <div class="doc-sidebar-content">
+                <div class="news-tabs">
+                    <button class="news-tab-btn active" data-tab="doc-sources">📋 Источники данных</button>
+                    <button class="news-tab-btn" data-tab="doc-glossary">📝 Глоссарий</button>
+                    <button class="news-tab-btn" data-tab="doc-usecases">👥 Кейсы</button>
+                    <button class="news-tab-btn" data-tab="doc-analogs">🔍 Аналоги</button>
+                    <button class="news-tab-btn" data-tab="doc-feedback">✅ Апробация</button>
+                    <button class="news-tab-btn" data-tab="doc-bibliography">📚 Библиография</button>
+                </div>
+
+                    <div id="docTabHint" class="muted" style="font-size:13px; margin: 10px 0 14px;">
+                        Выберите раздел, чтобы увидеть краткое описание материалов.
+                    </div>
+
+                <!-- Вкладка: Источники данных -->
+                <div class="news-tab-panel active" id="tab-doc-sources">
+                    <div class="card">
+                        <h3 style="margin-top: 0; margin-bottom: 16px;">📋 Источники данных и корректность показателей</h3>
+                        <p>
+                            Все данные, используемые на платформе, получены из официальных источников и верифицированы. 
+                            Ниже представлена таблица источников данных с указанием показателей, периодичности обновления и ограничений.
+                        </p>
+                        <p style="margin-top: 16px; padding: 12px; background: rgba(251,191,36,0.1); border-left: 3px solid rgba(251,191,36,0.5); border-radius: 8px; color: var(--muted); font-size: 14px;">
+                            <strong>⚠️ Важно:</strong> Данные могут иметь погрешность из-за особенностей сбора, обработки и интерполяции показателей. 
+                            Значения могут отличаться от фактических измерений на местах. При принятии решений рекомендуется учитывать возможные отклонения.
+                        </p>
+                        <div class="sources-table-wrapper" style="margin-top: 20px;">
+                            <table class="sources-table">
+                                <thead>
+                                    <tr>
+                                        <th>Источник</th>
+                                        <th>Показатель</th>
+                                        <th>Периодичность</th>
+                                        <th>Ограничения</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong><a href="https://meteoinfo.ru" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Росгидромет</a></strong></td>
+                                        <td>AQI, PM2.5, PM10, NO₂, SO₂</td>
+                                        <td>Ежедневно</td>
+                                        <td>Неполное покрытие малых населённых пунктов, задержка публикации 1–2 месяца</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong><a href="https://voda.gov.ru" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Росводресурсы</a></strong></td>
+                                        <td>Мутность, нитраты, БПК<sub>5</sub>, pH</td>
+                                        <td>Ежеквартально</td>
+                                        <td>Измерения только на постах наблюдения, значения интерполируются</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong><a href="https://rosstat.gov.ru" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Росстат</a></strong></td>
+                                        <td>Выбросы, отходы, лесной фонд</td>
+                                        <td>Ежегодно</td>
+                                        <td>Агрегированные по региону значения без детализации по предприятиям</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong><a href="https://www.bryanskobl.ru" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Открытые данные Брянской области</a></strong></td>
+                                        <td>Свалки, эко‑акции, правонарушения</td>
+                                        <td>По мере публикации</td>
+                                        <td>Требуется ручная верификация и очистка дубликатов</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вкладка: Глоссарий -->
+                <div class="news-tab-panel" id="tab-doc-glossary">
+                    <div class="card">
+                        <h3 style="margin-top: 0; margin-bottom: 16px;">Краткий глоссарий терминов</h3>
+                        <ul class="highlights" style="margin: 0;">
+                            <li><strong>AQI</strong> — индекс качества воздуха; чем ниже, тем лучше.</li>
+                            <li><strong>PM2.5, PM10</strong> — взвешенные частицы пыли; проникают в дыхательные пути.</li>
+                            <li><strong>БПК<sub>5</sub></strong> — биологическое потребление кислорода за 5 суток; чем выше, тем сильнее загрязнение воды органикой.</li>
+                            <li><strong>NO₂</strong> — диоксид азота, раздражает дыхательные пути.</li>
+                            <li><strong>SO₂</strong> — диоксид серы.</li>
+                            <li><strong>VOC</strong> — летучие органические соединения.</li>
+                            <li><strong>ЛВЖ</strong> — легковоспламеняющиеся жидкости.</li>
+                        </ul>
+                        <p style="margin-top: 16px; font-size: 13px; color: var(--muted);">
+                            Подсказки к терминам также доступны на странице «Обзор» при наведении на выделенные слова.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Вкладка: Кейсы использования -->
+                <div class="news-tab-panel" id="tab-doc-usecases">
+                    <div class="usecases-grid">
+                    <div class="card usecase-item">
+                        <h3>👥 Для жителей региона</h3>
+                        <p>
+                            <strong>Практическая польза:</strong> Выбор экологичных мест для отдыха, проверка наличия свалок рядом с домом, 
+                            возможность оставлять наблюдения о чистых и проблемных локациях через интерактивную карту.
+                        </p>
+                        <p style="margin-top: 8px; font-size: 13px; color: var(--muted);">
+                            <strong>Пример:</strong> Житель Брянска может проверить качество воздуха в районе, где планирует купить квартиру, 
+                            или найти ближайшую чистую зону для прогулок с детьми.
+                        </p>
+                    </div>
+                    <div class="card usecase-item">
+                        <h3>🏫 Для школ и образовательных учреждений</h3>
+                        <p>
+                            <strong>Практическая польза:</strong> Использование карты и графиков в учебных проектах, проведение исследований 
+                            качества среды в окрестности школы, планирование экологических акций.
+                        </p>
+                        <p style="margin-top: 8px; font-size: 13px; color: var(--muted);">
+                            <strong>Пример:</strong> Ученики 11 класса могут провести исследование экологической ситуации в своём районе, 
+                            добавить точки на карту и сравнить результаты с соседними районами.
+                        </p>
+                    </div>
+                    <div class="card usecase-item">
+                        <h3>🏛️ Для муниципалитетов и властей</h3>
+                        <p>
+                            <strong>Практическая польза:</strong> Анализ проблемных участков, приоритизация мероприятий по рекультивации и озеленению, 
+                            оценка динамики показателей и эффективности принятых мер.
+                        </p>
+                        <p style="margin-top: 8px; font-size: 13px; color: var(--muted);">
+                            <strong>Пример:</strong> Департамент природных ресурсов может использовать карту для планирования рекультивации свалок 
+                            и оценки результатов экологических программ.
+                        </p>
+                    </div>
+                    <div class="card usecase-item">
+                        <h3>🏢 Для бизнеса и экологических организаций</h3>
+                        <p>
+                            <strong>Практическая польза:</strong> Мониторинг экологической обстановки в зоне деятельности предприятия, 
+                            планирование экологических мероприятий, демонстрация социальной ответственности через участие в экологических проектах.
+                        </p>
+                        <p style="margin-top: 8px; font-size: 13px; color: var(--muted);">
+                            <strong>Пример:</strong> Компания может использовать платформу для оценки экологического воздействия своей деятельности 
+                            и планирования мероприятий по снижению углеродного следа.
+                        </p>
+                    </div>
+                </div>
+                </div>
+
+                <!-- Вкладка: Анализ аналогов -->
+                <div class="news-tab-panel" id="tab-doc-analogs">
+                    <div class="card">
+                    <p>
+                        Сравнение платформы «Экологический профиль региона» с федеральными и региональными экопорталами:
+                    </p>
+                    <div class="analogs-table-wrapper">
+                        <table class="analogs-table">
+                            <thead>
+                                <tr>
+                                    <th>Платформа</th>
+                                    <th>Карта свалок</th>
+                                    <th>Сравнение регионов</th>
+                                    <th>Обратная связь</th>
+                                    <th>Фокус на Брянской области</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><a href="https://rsv.ru" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">«Россия — страна возможностей»</a></td>
+                                    <td>Есть, без детальной карты Брянской области</td>
+                                    <td>Ограничено</td>
+                                    <td>Форумы</td>
+                                    <td>Нет</td>
+                                </tr>
+                                <tr>
+                                    <td><a href="https://ecology.gov.ru" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Федеральный портал «Экология России»</a></td>
+                                    <td>Общая карта объектов</td>
+                                    <td>Сводные показатели</td>
+                                    <td>Нет локальной обратной связи</td>
+                                    <td>Нет</td>
+                                </tr>
+                                <tr>
+                                    <td><a href="https://www.bryanskobl.ru" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Региональные сайты ведомств</a></td>
+                                    <td>Без интерактивной карты</td>
+                                    <td>Нет сравнения</td>
+                                    <td>Обращения через приёмные</td>
+                                    <td>Да, но данные разрознены</td>
+                                </tr>
+                                <tr style="background: rgba(16,185,129,0.1); font-weight: 600;">
+                                    <td><strong>Экологический профиль Брянской области (данный проект)</strong></td>
+                                    <td><strong>Подробная интерактивная карта</strong></td>
+                                    <td><strong>Наглядные графики и рейтинг</strong></td>
+                                    <td><strong>Возможность добавлять точки</strong></td>
+                                    <td><strong>Полный фокус на регионе</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <h3 style="margin-top: 24px; margin-bottom: 12px;">Ключевые преимущества проекта:</h3>
+                    <ul class="highlights">
+                        <li>Подробная интерактивная карта Брянской области с возможностью добавления пользовательских точек</li>
+                        <li>Сравнение с соседними регионами ЦФО с наглядными графиками</li>
+                        <li>Интеграция новостей и экологических событий</li>
+                        <li>Фокус на практической пользе для местных жителей</li>
+                    </ul>
+                </div>
+                </div>
+
+                <!-- Вкладка: Апробация проекта -->
+                <div class="news-tab-panel" id="tab-doc-feedback">
+                    <div class="card">
+                        <h3 style="margin-top: 0; margin-bottom: 20px;">✅ Апробация проекта и обратная связь</h3>
+                        
+                        <div style="margin-bottom: 24px; padding: 16px; background: rgba(16,185,129,0.1); border-left: 3px solid rgba(16,185,129,0.5); border-radius: 8px;">
+                            <h4 style="margin-top: 0; margin-bottom: 12px; color: var(--accent);">🎯 Почему стоит пользоваться сайтом?</h4>
+                            <ul class="highlights" style="margin: 0;">
+                                <li><strong>Актуальная информация</strong> — данные регулярно обновляются из официальных источников</li>
+                                <li><strong>Интерактивность</strong> — возможность добавлять свои наблюдения на карту</li>
+                                <li><strong>Наглядность</strong> — визуализация данных через графики и карты</li>
+                                <li><strong>Практическая польза</strong> — помощь в принятии решений для жителей, школ, бизнеса и властей</li>
+                                <li><strong>Сравнительный анализ</strong> — возможность сравнить экологическую ситуацию с соседними регионами</li>
+                                <li><strong>Экологическое просвещение</strong> — база знаний и калькулятор углеродного следа</li>
+                            </ul>
+                        </div>
+
+                        <h4 style="margin-top: 24px; margin-bottom: 16px;">📋 План апробации проекта</h4>
+                        <div style="margin-bottom: 24px;">
+                            <div style="margin-bottom: 16px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--border);">
+                                <h5 style="margin-top: 0; margin-bottom: 8px; color: var(--accent);">Этап 1: Пилотное тестирование (1-2 месяца)</h5>
+                                <ul style="margin: 0; padding-left: 20px; color: var(--muted);">
+                                    <li>Привлечение 50-100 активных пользователей из разных категорий (жители, школы, муниципалитеты)</li>
+                                    <li>Сбор первичной обратной связи через форму на сайте</li>
+                                    <li>Анализ использования основных функций платформы</li>
+                                    <li>Выявление технических проблем и недочётов интерфейса</li>
+                                </ul>
+                            </div>
+
+                            <div style="margin-bottom: 16px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--border);">
+                                <h5 style="margin-top: 0; margin-bottom: 8px; color: var(--accent);">Этап 2: Расширенное тестирование (2-3 месяца)</h5>
+                                <ul style="margin: 0; padding-left: 20px; color: var(--muted);">
+                                    <li>Увеличение аудитории до 300-500 пользователей</li>
+                                    <li>Проведение регулярных опросов граждан (ежемесячно)</li>
+                                    <li>Организация фокус-групп с представителями разных категорий пользователей</li>
+                                    <li>Внедрение улучшений на основе собранной обратной связи</li>
+                                    <li>Партнёрство с образовательными учреждениями для использования платформы в учебном процессе</li>
+                                </ul>
+                            </div>
+
+                            <div style="margin-bottom: 16px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--border);">
+                                <h5 style="margin-top: 0; margin-bottom: 8px; color: var(--accent);">Этап 3: Оценка эффективности (1 месяц)</h5>
+                                <ul style="margin: 0; padding-left: 20px; color: var(--muted);">
+                                    <li>Анализ статистики использования платформы</li>
+                                    <li>Оценка влияния платформы на экологическое поведение пользователей</li>
+                                    <li>Сбор финальной обратной связи через опросы</li>
+                                    <li>Подготовка отчёта об апробации с рекомендациями по дальнейшему развитию</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 24px; padding: 16px; background: rgba(6,182,212,0.1); border-left: 3px solid rgba(6,182,212,0.5); border-radius: 8px;">
+                            <h4 style="margin-top: 0; margin-bottom: 12px; color: var(--primary);">📊 Регулярные опросы граждан</h4>
+                            <p style="margin: 0 0 12px; color: var(--muted);">
+                                Для обеспечения актуальности и полезности платформы <strong>опросы граждан проводятся регулярно</strong> — ежемесячно в рамках расширенного тестирования и ежеквартально после запуска проекта.
+                            </p>
+                            <p style="margin: 0; color: var(--muted);">
+                                Опросы включают оценку удобства использования, полезности функций, качества данных и предложений по улучшению. 
+                                Результаты опросов учитываются при обновлении платформы и добавлении новых функций.
+                            </p>
+                        </div>
+
+                        <div style="margin-top: 24px;">
+                            <h4 style="margin-bottom: 12px;">💬 Форма обратной связи</h4>
+                            <p style="color: var(--muted); margin-bottom: 16px;">
+                                Вы можете оставить свой отзыв о платформе, предложить улучшения или сообщить об ошибках через форму обратной связи на странице «Обзор».
+                            </p>
+                            <a href="overview.html#feedback" style="display: inline-block; padding: 10px 20px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #022c22; text-decoration: none; border-radius: 10px; font-weight: 600; transition: all 0.3s ease;">
+                                Перейти к форме обратной связи →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вкладка: Библиография -->
+                <div class="news-tab-panel" id="tab-doc-bibliography">
+                    <div class="card">
+                        <h3 style="margin-top: 0; margin-bottom: 16px;">📚 Библиографический список</h3>
+                        <p style="margin-bottom: 16px; color: var(--muted);">
+                            Список использованных источников информации для разработки платформы и сбора данных об экологической ситуации в Брянской области.
+                        </p>
+                        <ol class="bibliography-list">
+                            <li>
+                                <a href="https://meteoinfo.ru" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Росгидромет</a>. 
+                                Государственный доклад о состоянии окружающей среды в Российской Федерации. 
+                                <a href="https://meteoinfo.ru/ru/climate/climate-monitoring" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline; font-size: 12px;">[Электронный ресурс]</a>
+                            </li>
+                            <li>
+                                <a href="https://www.bryanskobl.ru/dept/ecology" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Департамент природных ресурсов и экологии Брянской области</a>. 
+                                Доклады о состоянии и об охране окружающей среды Брянской области, 2023–2025 гг. 
+                                <a href="https://www.bryanskobl.ru/dept/ecology" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline; font-size: 12px;">[Электронный ресурс]</a>
+                            </li>
+                            <li>
+                                <a href="https://rosstat.gov.ru" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Росстат</a>. 
+                                Регионы России. Социально‑экономические показатели. 
+                                <a href="https://rosstat.gov.ru/folder/210/document/13204" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline; font-size: 12px;">[Электронный ресурс]</a>
+                            </li>
+                            <li>
+                                <a href="https://voda.gov.ru" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Росводресурсы</a>. 
+                                Государственный доклад о состоянии и использовании водных ресурсов Российской Федерации. 
+                                <a href="https://voda.gov.ru/activity/gosudarstvennyy-vodnyy-kadastr/gosudarstvennyy-doklad-o-sostoyanii-i-ispolzovanii-vodnyh-resursov/" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline; font-size: 12px;">[Электронный ресурс]</a>
+                            </li>
+                            <li>
+                                Федеральный закон от 10.01.2002 № 7-ФЗ «Об охране окружающей среды». 
+                                <a href="http://www.consultant.ru/document/cons_doc_LAW_34823/" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">КонсультантПлюс</a>.
+                            </li>
+                            <li>
+                                Открытые данные и новостные порталы Брянской области: 
+                                <a href="https://gubernia32.ru" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Губерния‑TV</a>, 
+                                <a href="https://newsbryansk.ru" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Новости Брянска</a>, 
+                                <a href="https://strela32.ru" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Стрела</a>.
+                            </li>
+                            <li>
+                                <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">OpenStreetMap</a>. 
+                                Открытая картографическая платформа для визуализации геоданных.
+                            </li>
+                            <li>
+                                <a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Leaflet.js</a>. 
+                                Библиотека для работы с интерактивными картами.
+                            </li>
+                            <li>
+                                <a href="https://www.chartjs.org" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: underline;">Chart.js</a>. 
+                                Библиотека для создания графиков и диаграмм.
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Затемнение фона при открытой панели -->
+        <div id="docSidebarOverlay" class="doc-sidebar-overlay"></div>
+
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div>
+                © <span id="year"></span> Экология Брянской области. Проект сделан Харьковой Софией.
+            </div>
+            <nav class="nav">
+                <a href="overview.html">Обзор</a>
+                <a href="personal.html">Личный вклад</a>
+                <a href="comparison.html">Сравнение</a>
+                <a href="news.html">Новости</a>
+            </nav>
+        </div>
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- App -->
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/features.js"></script>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Боковая панель документации
+        const docSidebarToggle = document.getElementById('docSidebarToggle');
+        const docSidebar = document.getElementById('docSidebar');
+        const docSidebarClose = document.getElementById('docSidebarClose');
+        const docSidebarOverlay = document.getElementById('docSidebarOverlay');
+        
+        function openDocSidebar() {
+            docSidebar.classList.add('open');
+            docSidebarOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeDocSidebar() {
+            docSidebar.classList.remove('open');
+            docSidebarOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        const DOC_SIDEBAR_OPEN_KEY = 'bryanskDocSidebarOpen';
+
+        if (docSidebarToggle) {
+            docSidebarToggle.addEventListener('click', () => {
+                openDocSidebar();
+                try { localStorage.setItem(DOC_SIDEBAR_OPEN_KEY, '1') } catch (e) {}
+            });
+        }
+        
+        if (docSidebarClose) {
+            docSidebarClose.addEventListener('click', () => {
+                closeDocSidebar();
+                try { localStorage.setItem(DOC_SIDEBAR_OPEN_KEY, '0') } catch (e) {}
+            });
+        }
+        
+        if (docSidebarOverlay) {
+            docSidebarOverlay.addEventListener('click', () => {
+                closeDocSidebar();
+                try { localStorage.setItem(DOC_SIDEBAR_OPEN_KEY, '0') } catch (e) {}
+            });
+        }
+
+        // restore sidebar open state
+        try {
+            const v = localStorage.getItem(DOC_SIDEBAR_OPEN_KEY);
+            if (v === '1') openDocSidebar();
+        } catch (e) {}
+
+        // cross-tab sync for open/close
+        window.addEventListener('storage', (e) => {
+            if (e.key !== DOC_SIDEBAR_OPEN_KEY) return
+            if (e.newValue === '1') openDocSidebar()
+            else closeDocSidebar()
+        })
+        
+        // Инициализация вкладок документации с плавными переходами
+        function initDocTabs() {
+            const buttons = document.querySelectorAll('#docSidebar .news-tab-btn');
+            const panels = document.querySelectorAll('#docSidebar .news-tab-panel');
+            const DOC_TAB_KEY = 'bryanskDocSidebarActiveTab';
+            const hintEl = document.getElementById('docTabHint');
+            const hints = {
+                'doc-sources': 'Откуда берутся данные и как устроены ограничения по охвату.',
+                'doc-glossary': 'Короткие подсказки к терминам и показателям (AQI, БПК5 и т.д.).',
+                'doc-usecases': 'Кому и зачем может быть полезна платформа.',
+                'doc-analogs': 'Сравнение с другими экопорталами и платформами (концепт).',
+                'doc-feedback': 'План апробации проекта и путь обратной связи.',
+                'doc-bibliography': 'Список источников и ссылки на материалы разработки.'
+            };
+
+            function activate(target) {
+                const panel = document.getElementById('tab-' + target);
+                if (!panel) return;
+                if (hintEl) hintEl.textContent = hints[target] || 'Выберите раздел, чтобы увидеть краткое описание материалов.';
+
+                panels.forEach((p) => {
+                    if (p.classList.contains('active')) {
+                        p.style.opacity = '0';
+                        p.style.transform = 'translateX(-10px)';
+                        setTimeout(() => {
+                            p.classList.remove('active');
+                        }, 200);
+                    }
+                });
+
+                buttons.forEach((b) => b.classList.remove('active'));
+                const btn = document.querySelector('#docSidebar .news-tab-btn[data-tab="' + target + '"]');
+                if (btn) btn.classList.add('active');
+
+                setTimeout(() => {
+                    panel.classList.add('active');
+                    setTimeout(() => {
+                        panel.style.opacity = '1';
+                        panel.style.transform = 'translateX(0)';
+                    }, 10);
+                }, 200);
+            }
+
+            const savedTarget = (() => {
+                try { return localStorage.getItem(DOC_TAB_KEY) } catch (e) { return null; }
+            })();
+            const existingActive = document.querySelector('#docSidebar .news-tab-panel.active');
+            const currentTarget = existingActive ? existingActive.id.replace('tab-', '') : null;
+            activate(savedTarget || currentTarget);
+            
+            buttons.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const target = btn.getAttribute('data-tab');
+                    activate(target);
+                    try { localStorage.setItem(DOC_TAB_KEY, target) } catch (e) {}
+                });
+            });
+
+            // cross-tab sync
+            window.addEventListener('storage', (e) => {
+                if (e.key !== DOC_TAB_KEY || !e.newValue) return;
+                activate(e.newValue);
+            });
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDocTabs);
+        } else {
+            initDocTabs();
+        }
+
+        // Переключение режимов Экология / История на главной
+        (function () {
+            const body = document.body;
+            const toggleBtn = document.getElementById('modeToggle');
+            const mainLabel = document.getElementById('modeToggleMain');
+            const badgeLabel = document.getElementById('modeToggleBadge');
+
+            const ECO_MAP_POINTS = [
+                { title: 'Центральный парк', sub: 'рекреация, зелёный каркас', coords: [53.2469, 34.3649], color: '#22c55e' },
+                { title: 'Нацпарк «Брянский лес»', sub: 'ООПТ, водоохранная зона', coords: [52.5660, 33.8360], color: '#10b981' },
+                { title: 'Пост мониторинга воздуха (демо)', sub: 'условная точка наблюдения', coords: [53.258, 34.355], color: '#06b6d4' },
+                { title: 'Пойма Десны (Трубчевск)', sub: 'природный комплекс', coords: [52.5800, 33.7700], color: '#22c55e' },
+                { title: 'Жуковка — сосновый бор', sub: 'лесной массив', coords: [53.5320, 33.7300], color: '#22c55e' },
+                { title: 'Почеп — прибрежная зона', sub: 'береговая линия', coords: [52.9300, 33.4500], color: '#06b6d4' },
+                { title: 'Стародуб — городской парк', sub: 'зелёные насаждения', coords: [52.5850, 32.7600], color: '#22c55e' },
+                { title: 'Унеча — лесной массив', sub: 'низкая антропогенная нагрузка', coords: [52.8500, 32.6800], color: '#22c55e' },
+                { title: 'Злынка — ландшафт', sub: 'природные территории', coords: [52.4300, 31.7300], color: '#22c55e' },
+                { title: 'Клинцы — сквер', sub: 'зона отдыха', coords: [52.7500, 32.2400], color: '#22c55e' },
+                { title: 'Дятьково — зелёная зона (демо)', sub: 'озеленение', coords: [53.599, 34.335], color: '#22c55e' },
+                { title: 'Карачев', sub: 'исторический центр, парки', coords: [53.123, 34.988], color: '#22c55e' },
+                { title: 'Новозыбков', sub: 'наблюдение за средой (демо)', coords: [52.537, 31.933], color: '#06b6d4' },
+                { title: 'Сельцо', sub: 'жилой массив, экотропа (демо)', coords: [53.367, 34.738], color: '#22c55e' },
+                { title: 'Пункт приёма вторсырья (демо)', sub: 'Брянск', coords: [53.243, 34.328], color: '#a3e635' },
+                { title: 'Экоакция / субботник (демо)', sub: 'точка волонтёров', coords: [53.268, 34.402], color: '#a3e635' },
+                { title: 'Наблюдение за водой (демо)', sub: 'пост на Десне', coords: [53.220, 34.310], color: '#06b6d4' },
+                { title: 'Климов — зона контроля (демо)', sub: 'напоминание о мониторинге', coords: [52.065, 35.205], color: '#f59e0b' }
+            ]
+
+            // Карты Leaflet (отдельно от раздела «Обзор», чтобы ничего не сломать)
+            let ecoMap = null
+            let historyMap = null
+
+            const chartText = '#e8f1ee'
+            const chartMuted = '#94a3b8'
+            const chartGrid = 'rgba(148,163,184,0.15)'
+
+            function destroyHistoryCharts() {
+                ;['historyChartPosts', 'historyChartRegions', 'historyChartMeasures', 'historyChartEducation', 'knowledgeChartOopt'].forEach((id) => {
+                    const el = document.getElementById(id)
+                    if (el && typeof Chart !== 'undefined' && Chart.getChart) {
+                        const c = Chart.getChart(el)
+                        if (c) c.destroy()
+                    }
+                })
+            }
+
+            function initHistoryCharts() {
+                if (typeof Chart === 'undefined') return
+                destroyHistoryCharts()
+
+                const elOopt = document.getElementById('knowledgeChartOopt')
+                if (elOopt) {
+                    new Chart(elOopt, {
+                        type: 'line',
+                        data: {
+                            labels: ['1985', '1990', '1995', '2000', '2005', '2010', '2015', '2020', '2024'],
+                            datasets: [{
+                                label: 'Площадь ООПТ (тыс. га)',
+                                data: [5, 12, 18, 22, 28, 35, 42, 48, 52],
+                                borderColor: 'rgba(245, 158, 11, 0.95)',
+                                backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                                fill: true,
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { labels: { color: chartText } } },
+                            scales: {
+                                y: { beginAtZero: true, grid: { color: chartGrid }, ticks: { color: chartMuted } },
+                                x: { grid: { color: chartGrid }, ticks: { color: chartMuted } }
+                            }
+                        }
+                    })
+                }
+
+                const years = ['1990', '1995', '2000', '2005', '2010', '2015', '2020']
+                const posts = [12, 18, 24, 31, 38, 44, 52]
+                const elPosts = document.getElementById('historyChartPosts')
+                if (elPosts) {
+                    new Chart(elPosts, {
+                        type: 'line',
+                        data: {
+                            labels: years,
+                            datasets: [{
+                                label: 'Посты наблюдения (демо)',
+                                data: posts,
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245,158,11,0.12)',
+                                fill: true,
+                                tension: 0.25
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { labels: { color: chartText } } },
+                            scales: {
+                                x: { ticks: { color: chartMuted }, grid: { color: chartGrid } },
+                                y: { ticks: { color: chartMuted }, grid: { color: chartGrid }, beginAtZero: true }
+                            }
+                        }
+                    })
+                }
+
+                const districts = ['Климовский', 'Новозыбковский', 'Злынковский', 'Клинцовский', 'Гордеевский', 'Навлинский']
+                const scores = [92, 88, 85, 62, 48, 35]
+                const elReg = document.getElementById('historyChartRegions')
+                if (elReg) {
+                    new Chart(elReg, {
+                        type: 'bar',
+                        data: {
+                            labels: districts,
+                            datasets: [{
+                                label: 'Индекс ограничений (демо)',
+                                data: scores,
+                                backgroundColor: 'rgba(245,158,11,0.45)',
+                                borderColor: '#fbbf24',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { labels: { color: chartText } } },
+                            scales: {
+                                x: { ticks: { color: chartMuted, maxRotation: 45, minRotation: 0 }, grid: { display: false } },
+                                y: { ticks: { color: chartMuted }, grid: { color: chartGrid }, beginAtZero: true, max: 100 }
+                            }
+                        }
+                    })
+                }
+
+                const elPie = document.getElementById('historyChartMeasures')
+                if (elPie) {
+                    new Chart(elPie, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Медицина', 'Соцвыплаты', 'Мониторинг', 'ЖКХ/инфраструктура', 'Просвещение'],
+                            datasets: [{
+                                data: [22, 28, 18, 20, 12],
+                                backgroundColor: ['#f59e0b', '#10b981', '#06b6d4', '#a78bfa', '#f472b6'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom', labels: { color: chartText, boxWidth: 12 } }
+                            }
+                        }
+                    })
+                }
+
+                const eduYears = ['2010', '2012', '2014', '2016', '2018', '2020', '2022', '2024']
+                const eduVals = [120, 135, 150, 168, 182, 195, 210, 228]
+                const elEdu = document.getElementById('historyChartEducation')
+                if (elEdu) {
+                    new Chart(elEdu, {
+                        type: 'line',
+                        data: {
+                            labels: eduYears,
+                            datasets: [{
+                                label: 'Мероприятий в год (демо)',
+                                data: eduVals,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16,185,129,0.12)',
+                                fill: true,
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { labels: { color: chartText } } },
+                            scales: {
+                                x: { ticks: { color: chartMuted }, grid: { color: chartGrid } },
+                                y: { ticks: { color: chartMuted }, grid: { color: chartGrid }, beginAtZero: false }
+                            }
+                        }
+                    })
+                }
+
+                setTimeout(() => {
+                    ;['historyChartPosts', 'historyChartRegions', 'historyChartMeasures', 'historyChartEducation', 'knowledgeChartOopt'].forEach((id) => {
+                        const el = document.getElementById(id)
+                        const c = el && Chart.getChart ? Chart.getChart(el) : null
+                        if (c) c.resize()
+                    })
+                }, 120)
+            }
+
+            function initEcoMap() {
+                const el = document.getElementById('ecoMap')
+                if (!el || ecoMap) return
+                ecoMap = L.map(el).setView([53.252, 34.371], 7.9)
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(ecoMap)
+
+                ECO_MAP_POINTS.forEach((p) => {
+                    L.circleMarker(p.coords, {
+                        radius: 9,
+                        color: p.color,
+                        fillColor: p.color,
+                        fillOpacity: 0.82,
+                        weight: 2,
+                        opacity: 1
+                    })
+                        .bindPopup(`<strong>📍 ${p.title}</strong><br><span style="color:#b6c4bf;font-size:12px;">${p.sub}</span>`)
+                        .bindTooltip(p.title, { direction: 'top', offset: [0, -8] })
+                        .addTo(ecoMap)
+                })
+
+                // Легенда (эко-режим)
+                const legend = L.control({ position: 'bottomright' })
+                legend.onAdd = function () {
+                    const div = L.DomUtil.create('div', 'card')
+                    div.style.padding = '10px'
+                    div.innerHTML = `
+                        <div style="font-weight:900;margin-bottom:6px;">Легенда карты</div>
+                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">
+                          <span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block"></span>
+                          <span style="color:#b6c4bf;font-size:13px;">Чистые зоны / парки</span>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">
+                          <span style="width:10px;height:10px;border-radius:50%;background:#06b6d4;display:inline-block"></span>
+                          <span style="color:#b6c4bf;font-size:13px;">Посты мониторинга</span>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">
+                          <span style="width:10px;height:10px;border-radius:50%;background:#a3e635;display:inline-block"></span>
+                          <span style="color:#b6c4bf;font-size:13px;">Экособытия / зелёные точки</span>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                          <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block"></span>
+                          <span style="color:#b6c4bf;font-size:13px;">Зона контроля</span>
+                        </div>
+                    `
+                    return div
+                }
+                legend.addTo(ecoMap)
+            }
+
+            function initHistoryMap() {
+                const el = document.getElementById('historyMap')
+                if (!el || historyMap) return
+                historyMap = L.map(el).setView([53.252, 34.371], 7.9)
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(historyMap)
+
+                const places = [
+                    { title: 'Климовский р-н — зона контроля', coords: [52.830, 35.250], color: '#f59e0b' },
+                    { title: 'Новозыбковский р-н — мониторинг', coords: [52.540, 31.940], color: '#f59e0b' },
+                    { title: 'Злынковский р-н — лес/сельхоз', coords: [52.900, 33.100], color: '#f59e0b' },
+                    { title: 'Клинцовский р-н — память, музеи', coords: [52.750, 32.240], color: '#fde68a' },
+                    { title: 'Брянск — архивы и библиотеки', coords: [53.252, 34.371], color: '#fde68a' },
+                    { title: 'Гордеевский р-н', coords: [53.034, 33.915], color: '#fbbf24' },
+                    { title: 'Навлинский р-н', coords: [52.825, 34.500], color: '#fbbf24' },
+                    { title: 'НП «Брянский лес» — визит-центр (демо)', coords: [52.566, 33.836], color: '#34d399' },
+                    { title: 'Мемориал / урок памяти (демо)', coords: [53.248, 34.360], color: '#f472b6' },
+                    { title: 'Школьный музей (демо)', coords: [53.240, 34.390], color: '#f472b6' },
+                    { title: 'Дятьково — местная история', coords: [53.599, 34.335], color: '#fde68a' },
+                    { title: 'Новозыбков — центр', coords: [52.537, 31.933], color: '#fbbf24' },
+                    { title: 'Злынка — пограничье', coords: [52.426, 31.737], color: '#fbbf24' },
+                    { title: 'Унеча', coords: [52.846, 32.682], color: '#fde68a' },
+                    { title: 'Почеп', coords: [52.915, 33.471], color: '#fde68a' },
+                    { title: 'Севск', coords: [52.148, 34.508], color: '#fbbf24' },
+                    { title: 'Трубчевск — пойма Десны', coords: [52.582, 33.766], color: '#34d399' },
+                    { title: 'Жуковка', coords: [53.534, 33.730], color: '#34d399' },
+                    { title: 'Карачев', coords: [53.123, 34.988], color: '#fde68a' },
+                    { title: 'Брянск — Десна (наблюдение)', coords: [53.262, 34.320], color: '#06b6d4' }
+                ]
+
+                places.forEach((p) => {
+                    L.circleMarker(p.coords, {
+                        radius: 9,
+                        color: p.color,
+                        fillColor: p.color,
+                        fillOpacity: 0.82,
+                        weight: 2,
+                        opacity: 1
+                    })
+                        .bindPopup(`<strong>🗺️ ${p.title}</strong>`)
+                        .bindTooltip(p.title, { direction: 'top', offset: [0, -8] })
+                        .addTo(historyMap)
+                })
+
+                // Легенда (исторический профиль)
+                const legend = L.control({ position: 'bottomright' })
+                legend.onAdd = function () {
+                    const div = L.DomUtil.create('div', 'card')
+                    div.style.padding = '10px'
+                    div.innerHTML = `
+                        <div style="font-weight:900;margin-bottom:6px;">Легенда карты</div>
+                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">
+                          <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block"></span>
+                          <span style="color:#b6c4bf;font-size:13px;">Зоны контроля</span>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">
+                          <span style="width:10px;height:10px;border-radius:50%;background:#fde68a;display:inline-block"></span>
+                          <span style="color:#b6c4bf;font-size:13px;">Архивы / центры</span>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">
+                          <span style="width:10px;height:10px;border-radius:50%;background:#34d399;display:inline-block"></span>
+                          <span style="color:#b6c4bf;font-size:13px;">ООПТ / природа</span>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">
+                          <span style="width:10px;height:10px;border-radius:50%;background:#f472b6;display:inline-block"></span>
+                          <span style="color:#b6c4bf;font-size:13px;">Уроки памяти</span>
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                          <span style="width:10px;height:10px;border-radius:50%;background:#06b6d4;display:inline-block"></span>
+                          <span style="color:#b6c4bf;font-size:13px;">Наблюдение за водой</span>
+                        </div>
+                    `
+                    return div
+                }
+                legend.addTo(historyMap)
+            }
+
+            const HEROES = [
+                { name: 'Ликвидатор А.', years: '1986–1987', role: 'Ликвидатор', category: 'Ликвидаторы', bio: 'Демо-карточка. Заполните имя, должность и вклад.' },
+                { name: 'Ликвидатор Б.', years: '1986–1988', role: 'Ликвидатор', category: 'Ликвидаторы', bio: 'Демо-карточка. Какие работы выполнялись, где и чем помогли?' },
+                { name: 'Врач-радиолог.', years: '1986–1990', role: 'Медицина', category: 'Учёные и медики', bio: 'Демо-карточка. Укажите роль врача/учёного и программу наблюдения.' },
+                { name: 'Научный сотрудник.', years: '1986–1995', role: 'Наука', category: 'Учёные и медики', bio: 'Демо-карточка. Вклад в исследования, мониторинг и рекомендации.' },
+                { name: 'Организатор памяти.', years: '—', role: 'Общественная работа', category: 'Общественные деятели и волонтёры', bio: 'Демо-карточка. Акции памяти, встречи, уроки мужества.' },
+                { name: 'Волонтёр «Память».', years: '—', role: 'Волонтёр', category: 'Общественные деятели и волонтёры', bio: 'Демо-карточка. Уход за мемориалами, сбор воспоминаний и оцифровка.' }
+            ]
+
+            function renderHeroes() {
+                const grid = document.getElementById('heroesGrid')
+                if (!grid) return
+                const cards = HEROES.map((h) => `
+                    <div class="card">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                            <div style="width:44px;height:44px;border-radius:16px;background:linear-gradient(145deg, rgba(245,158,11,0.18), rgba(16,185,129,0.08));border:1px solid rgba(245,158,11,0.25);display:flex;align-items:center;justify-content:center;font-size:18px;">
+                                🎖️
+                            </div>
+                            <div>
+                                <div style="font-weight:900;">${h.name}</div>
+                                <div class="muted" style="font-size:12px;margin-top:2px;">${h.category} · ${h.years}</div>
+                            </div>
+                        </div>
+                        <h3 style="margin:0 0 8px; color: var(--accent); font-size:16px;">${h.role}</h3>
+                        <p class="muted" style="margin:0; font-size:13px; line-height:1.55;">${h.bio}</p>
+                    </div>
+                `).join('')
+                grid.innerHTML = cards
+            }
+
+            const MODE_KEY = 'bryanskEcoMode'
+            function persistMode(mode) {
+                try { localStorage.setItem(MODE_KEY, mode) } catch (e) {}
+            }
+
+            function setMode(mode) {
+                const isHistory = mode === 'history'
+                body.classList.toggle('mode-history', isHistory)
+                body.classList.toggle('mode-eco', !isHistory)
+
+                if (mainLabel && badgeLabel) {
+                    if (isHistory) {
+                        mainLabel.textContent = 'История'
+                        badgeLabel.textContent = 'Экология'
+                    } else {
+                        mainLabel.textContent = 'Экология'
+                        badgeLabel.textContent = 'История'
+                    }
+                }
+
+                if (isHistory) {
+                    initHistoryMap()
+                    initHistoryCharts()
+                    setTimeout(() => {
+                        if (historyMap) historyMap.invalidateSize()
+                    }, 50)
+                } else {
+                    destroyHistoryCharts()
+                    initEcoMap()
+                    setTimeout(() => { if (ecoMap) ecoMap.invalidateSize() }, 50)
+                }
+                persistMode(isHistory ? 'history' : 'eco')
+            }
+
+            function resolveInitialMode() {
+                const h = location.hash
+                if (h === '#history-knowledge' || h === '#ecogeroi' || h === '#history') return 'history'
+                try {
+                    const s = localStorage.getItem(MODE_KEY)
+                    if (s === 'history' || s === 'eco') return s
+                } catch (e) {}
+                return 'eco'
+            }
+
+            window.addEventListener('storage', (e) => {
+                if (e.key !== MODE_KEY || !e.newValue) return
+                if (e.newValue === 'history' || e.newValue === 'eco') setMode(e.newValue)
+            })
+
+            window.addEventListener('hashchange', () => {
+                const h = location.hash
+                if (h === '#history-knowledge' || h === '#ecogeroi' || h === '#history') {
+                    setMode('history')
+                    const id = h.slice(1)
+                    const el = document.getElementById(id)
+                    if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 400)
+                }
+            })
+
+            toggleBtn?.addEventListener('click', () => {
+                const isHistoryNow = body.classList.contains('mode-history')
+                setMode(isHistoryNow ? 'eco' : 'history')
+            })
+
+            document.querySelectorAll('a[href="#history-knowledge"], a[href="#ecogeroi"]').forEach((a) => {
+                a.addEventListener('click', () => {
+                    setTimeout(() => {
+                        setMode('history')
+                        const id = a.getAttribute('href').slice(1)
+                        const el = document.getElementById(id)
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    }, 0)
+                })
+            })
+
+            renderHeroes()
+            setMode(resolveInitialMode())
+            if (location.hash === '#history-knowledge' || location.hash === '#ecogeroi') {
+                setTimeout(() => {
+                    const id = location.hash.slice(1)
+                    const el = document.getElementById(id)
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }, 700)
+            }
+        })();
+
+    </script>
+</body>
+</html>
+
+

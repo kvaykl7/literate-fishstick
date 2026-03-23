@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Сравнение регионов — Экология Брянской области</title>
+    <meta name="description" content="Сравнительный анализ экологических показателей Брянской области с соседними регионами ЦФО." />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <style>
+        /* Стили страницы «Сравнение» */
+        .page-comparison main .container { max-width: 1120px; }
+        .page-comparison .hero .lead { max-width: 800px; margin-left: auto; margin-right: auto; }
+        .page-comparison .comparison-table-wrapper { overflow-x: auto; }
+    </style>
+</head>
+<body class="page-comparison">
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <a href="index.html" class="logo" aria-hidden="true" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">🌿</a>
+                <div>
+                    <h1>Экологический профиль региона</h1>
+                    <p class="tagline">Обзор · Личный вклад · Сравнение</p>
+                </div>
+            </div>
+            <nav class="nav">
+                <a href="overview.html" class="nav-link">Обзор</a>
+                <a href="personal.html" class="nav-link">Личный вклад</a>
+                <a href="comparison.html" class="nav-link" aria-current="page">Сравнение</a>
+                <a href="news.html" class="nav-link">Новости</a>
+                <button id="modeToggle" class="mode-toggle" type="button" aria-label="Переключить режим">
+                    <span id="modeToggleMain">Экология</span>
+                    <span id="modeToggleBadge" class="mode-toggle-badge">История</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <a href="index.html" class="btn-back">← На главную</a>
+        </div>
+        <section class="section hero reveal">
+            <div class="container">
+                <h2><span class="icon icon-alert" aria-hidden="true">📊</span> Сравнение с соседними регионами</h2>
+                <p class="lead" style="max-width: 800px; margin: 0 auto;">
+                    Детальный сравнительный анализ экологических показателей Брянской области с Орловской, Курской, Калужской, Смоленской, Белгородской областями и другими регионами Центрального федерального округа. Данные включают качество воздуха, состояние водных ресурсов, объёмы выбросов и переработку отходов.
+                </p>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2>Ключевые показатели</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Индекс качества воздуха (AQI)</h3>
+                        <p class="muted" style="margin-bottom: 16px;">Среднегодовой индекс качества атмосферного воздуха по регионам. Чем ниже значение, тем лучше качество воздуха.</p>
+                        <canvas id="comparisonAirChart" height="120"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>Индекс качества воды</h3>
+                        <p class="muted" style="margin-bottom: 16px;">Комплексный показатель состояния поверхностных водных объектов, включающий мутность, содержание нитратов, БПК5, pH и другие параметры.</p>
+                        <canvas id="comparisonWaterChart" height="120"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2>Объёмы выбросов и переработка отходов</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Объём выбросов загрязняющих веществ</h3>
+                        <p class="muted" style="margin-bottom: 16px;">Общий объём выбросов в атмосферу от стационарных источников (тыс. тонн в год).</p>
+                        <canvas id="comparisonEmissionsChart" height="120"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>Доля переработанных отходов</h3>
+                        <p class="muted" style="margin-bottom: 16px;">Процент отходов, направленных на переработку и утилизацию от общего объёма образованных отходов.</p>
+                        <canvas id="comparisonWasteChart" height="120"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2>Детальное сравнение по загрязнителям</h2>
+                <div class="card">
+                    <h3>Концентрации основных загрязнителей воздуха</h3>
+                    <p class="muted" style="margin-bottom: 16px;">Средние концентрации PM2.5, PM10, NO₂ и SO₂ в атмосферном воздухе (мкг/м³).</p>
+                    <canvas id="comparisonPollutantsChart" height="100"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2>Сводная таблица показателей</h2>
+                <div class="card">
+                    <p class="muted" style="margin-bottom: 16px;">Полная таблица экологических показателей по всем сравниваемым регионам. Брянская область выделена зелёным цветом, что позволяет сразу увидеть её позицию по отношению к соседям.</p>
+                    <div class="comparison-table-wrapper">
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Регион</th>
+                                    <th>AQI (воздух)</th>
+                                    <th>Индекс воды</th>
+                                    <th>Выбросы (тыс. т/год)</th>
+                                    <th>Обработка отходов (%)</th>
+                                    <th>PM2.5 (мкг/м³)</th>
+                                    <th>PM10 (мкг/м³)</th>
+                                    <th>NO₂ (мкг/м³)</th>
+                                    <th>Лесной фонд (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparisonTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2>Аналитические выводы</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Сильные стороны Брянской области</h3>
+                        <ul class="checklist">
+                            <li>Относительно стабильный индекс качества воды (70 баллов)</li>
+                            <li>Средний уровень выбросов по сравнению с соседними регионами</li>
+                            <li>Развитая система мониторинга экологической обстановки</li>
+                            <li>Активная работа по озеленению территорий</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Области для улучшения</h3>
+                        <ul class="checklist">
+                            <li>Повышение доли переработки отходов (сейчас 32%, целевой показатель 50%+)</li>
+                            <li>Снижение концентраций PM2.5 и PM10 в промышленных зонах</li>
+                            <li>Модернизация очистных сооружений для улучшения качества воды</li>
+                            <li>Внедрение наилучших доступных технологий на предприятиях</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2>Рейтинг регионов</h2>
+                <div class="card">
+                    <p class="muted" style="margin-bottom: 20px;">Общий экологический рейтинг регионов на основе комплексной оценки всех показателей (чем выше балл, тем лучше экологическая ситуация).</p>
+                    <canvas id="comparisonRankingChart" height="100"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div>
+                © <span id="year"></span> Экология Брянской области. Проект сделан Харьковой Софией.
+            </div>
+            <nav class="nav">
+                <a href="index.html">Главная</a>
+                <a href="overview.html">Обзор</a>
+                <a href="personal.html">Личный вклад</a>
+                <a href="comparison.html">Сравнение</a>
+                <a href="news.html">Новости</a>
+            </nav>
+        </div>
+    </footer>
+
+    <!-- Калькулятор только в разделе «Личный вклад»: personal.html#calculator -->
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- App -->
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/comparison.js"></script>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Постоянная кнопка «История / Экология» на всех вкладках
+        (function initGlobalModeToggle() {
+            const MODE_KEY = 'bryanskEcoMode'
+            const btn = document.getElementById('modeToggle')
+            const main = document.getElementById('modeToggleMain')
+            const badge = document.getElementById('modeToggleBadge')
+            if (!btn || !main || !badge) return
+
+            function apply(mode) {
+                const isHistory = mode === 'history'
+                document.body.classList.toggle('mode-history', isHistory)
+                document.body.classList.toggle('mode-eco', !isHistory)
+                if (isHistory) {
+                    main.textContent = 'История'
+                    badge.textContent = 'Экология'
+                } else {
+                    main.textContent = 'Экология'
+                    badge.textContent = 'История'
+                }
+            }
+
+            let mode = 'eco'
+            try {
+                const saved = localStorage.getItem(MODE_KEY)
+                if (saved === 'history' || saved === 'eco') mode = saved
+            } catch (e) {}
+            apply(mode)
+
+            btn.addEventListener('click', () => {
+                const currentIsHistory = document.body.classList.contains('mode-history')
+                const nextMode = currentIsHistory ? 'eco' : 'history'
+                try { localStorage.setItem(MODE_KEY, nextMode) } catch (e) {}
+                apply(nextMode)
+                const hash = nextMode === 'history' ? '#history-knowledge' : ''
+                window.location.href = 'index.html' + hash
+            })
+
+            window.addEventListener('storage', (e) => {
+                if (e.key !== MODE_KEY || !e.newValue) return
+                if (e.newValue === 'history' || e.newValue === 'eco') apply(e.newValue)
+            })
+        })()
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Возможности и требования — Экология Брянской области</title>
+    <meta name="description" content="Реализованный функционал платформы и требования экспертов к проекту «Экологический профиль региона»." />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <style>
+        .requirements-tabs {
+            margin-top: 32px;
+            margin-bottom: 32px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 6px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .requirements-tab-btn {
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .requirements-tab-btn:hover {
+            color: var(--text);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .requirements-tab-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #022c22;
+            box-shadow: 0 6px 18px rgba(16,185,129,0.3);
+        }
+
+        .requirements-tab-panel {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .requirements-tab-panel.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            animation: fadeInTab 0.4s ease;
+        }
+
+        @keyframes fadeInTab {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .feature-card {
+            background: linear-gradient(145deg, var(--panel), var(--panel-2));
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 0;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .feature-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .feature-title {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .feature-body {
+            padding: 24px;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .feature-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--muted);
+            line-height: 1.6;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .feature-list li strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .requirement-item {
+            background: linear-gradient(145deg, var(--panel), var(--panel-2));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .requirement-item:hover {
+            border-color: rgba(6,182,212,0.4);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .req-number {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #022c22;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .req-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .req-label {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .req-label.requirement {
+            background: rgba(239,68,68,0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239,68,68,0.3);
+        }
+
+        .req-label.implementation {
+            background: rgba(16,185,129,0.2);
+            color: #6ee7b7;
+            border: 1px solid rgba(16,185,129,0.3);
+        }
+
+        .req-text {
+            color: var(--muted);
+            line-height: 1.7;
+            margin: 12px 0;
+            font-size: 14px;
+        }
+
+        .req-text strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .expert-header {
+            background: linear-gradient(135deg, rgba(6,182,212,0.1), rgba(16,185,129,0.1));
+            border: 1px solid rgba(6,182,212,0.2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .expert-header h3 {
+            margin: 0 0 8px;
+            font-size: 24px;
+            color: var(--text);
+        }
+
+        .expert-header p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* Цветовые схемы */
+        .card-blue .feature-header {
+            background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(14,165,233,0.1));
+        }
+        .card-blue .feature-icon {
+            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+            color: #0c4a6e;
+        }
+
+        .card-green .feature-header {
+            background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.1));
+        }
+        .card-green .feature-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #064e3b;
+        }
+
+        .card-yellow .feature-header {
+            background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.1));
+        }
+        .card-yellow .feature-icon {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #78350f;
+        }
+
+        .card-purple .feature-header {
+            background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(124,58,237,0.1));
+        }
+        .card-purple .feature-icon {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: #4c1d95;
+        }
+
+        .card-pink .feature-header {
+            background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(219,39,119,0.1));
+        }
+        .card-pink .feature-icon {
+            background: linear-gradient(135deg, #ec4899, #db2777);
+            color: #831843;
+        }
+
+        .stats-banner {
+            background: linear-gradient(135deg, rgba(6,182,212,0.1), rgba(16,185,129,0.1));
+            border: 1px solid rgba(6,182,212,0.2);
+            border-radius: 16px;
+            padding: 32px;
+            margin-top: 48px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 32px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tech-stack {
+            margin-top: 48px;
+            padding: 32px;
+            background: linear-gradient(145deg, var(--panel), var(--panel-2));
+            border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+
+        .tech-stack h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        .tech-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .tech-badge {
+            padding: 8px 16px;
+            background: rgba(6,182,212,0.15);
+            border: 1px solid rgba(6,182,212,0.3);
+            border-radius: 8px;
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .requirements-tabs {
+                flex-direction: column;
+            }
+            .requirements-tab-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <a href="index.html" class="logo" aria-hidden="true" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">🌿</a>
+                <div>
+                    <h1>Экологический профиль региона</h1>
+                    <p class="tagline">Документация · Требования · Реализация</p>
+                </div>
+            </div>
+            <nav class="nav">
+                <a href="overview.html" class="nav-link">Обзор</a>
+                <a href="personal.html" class="nav-link">Личный вклад</a>
+                <a href="comparison.html" class="nav-link">Сравнение</a>
+                <a href="news.html" class="nav-link">Новости</a>
+                <button id="modeToggle" class="mode-toggle" type="button" aria-label="Переключить режим">
+                    <span id="modeToggleMain">Экология</span>
+                    <span id="modeToggleBadge" class="mode-toggle-badge">История</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="section hero reveal">
+            <div class="container">
+                <h2>Возможности платформы и требования</h2>
+                <p class="lead">
+                    Полный обзор реализованного функционала проекта «Экологический профиль региона» и требования экспертов 
+                    с описанием их реализации. Платформа предоставляет интерактивные инструменты для анализа экологической ситуации, 
+                    визуализации данных и взаимодействия с информацией о состоянии окружающей среды Брянской области.
+                </p>
+
+                <div class="requirements-tabs">
+                    <button class="requirements-tab-btn active" data-tab="features">🚀 Возможности</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Вкладка: Возможности -->
+        <section class="section reveal">
+            <div class="container">
+                <div class="requirements-tab-panel active" id="tab-features">
+                    <div class="features-grid">
+                        <!-- Главная страница -->
+                        <div class="feature-card card-blue">
+                            <div class="feature-header">
+                                <div class="feature-icon">🏠</div>
+                                <h3 class="feature-title">Главная страница</h3>
+                            </div>
+                            <div class="feature-body">
+                                <ul class="feature-list">
+                                    <li><strong>Ключевые показатели</strong> экологической ситуации (AQI, качество воды, количество локаций)</li>
+                                    <li><strong>Интерактивная карта</strong> с маркерами чистых и проблемных локаций</li>
+                                    <li><strong>Графики качества воздуха и воды</strong> с визуализацией данных</li>
+                                    <li><strong>Добавление точек на карту</strong> пользователями</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Интерактивная карта -->
+                        <div class="feature-card card-green">
+                            <div class="feature-header">
+                                <div class="feature-icon">🗺️</div>
+                                <h3 class="feature-title">Интерактивная карта</h3>
+                            </div>
+                            <div class="feature-body">
+                                <ul class="feature-list">
+                                    <li><strong>Интерактивная карта</strong> с маркерами чистых и проблемных локаций</li>
+                                    <li><strong>Кластеризация маркеров</strong> и тепловая карта загрязнений</li>
+                                    <li><strong>Добавление пользовательских точек</strong> с сохранением данных</li>
+                                    <li><strong>Автоматическое обновление показателей</strong> при изменении данных</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Сравнение регионов -->
+                        <div class="feature-card card-yellow">
+                            <div class="feature-header">
+                                <div class="feature-icon">⚖️</div>
+                                <h3 class="feature-title">Сравнение регионов</h3>
+                            </div>
+                            <div class="feature-body">
+                                <ul class="feature-list">
+                                    <li><strong>Сравнительный анализ</strong> с соседними регионами ЦФО</li>
+                                    <li><strong>Рейтинговая система</strong> и интегральный экологический индекс</li>
+                                    <li><strong>Визуальное сравнение</strong> через графики и диаграммы</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Новости и события -->
+                        <div class="feature-card card-purple">
+                            <div class="feature-header">
+                                <div class="feature-icon">📰</div>
+                                <h3 class="feature-title">Новости и события</h3>
+                            </div>
+                            <div class="feature-body">
+                                <ul class="feature-list">
+                                    <li><strong>Лента новостей</strong> об экологических проектах и инициативах</li>
+                                    <li><strong>Календарь экологических праздников</strong> с описанием событий</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Документация -->
+                        <div class="feature-card card-pink">
+                            <div class="feature-header">
+                                <div class="feature-icon">📖</div>
+                                <h3 class="feature-title">Документация проекта</h3>
+                            </div>
+                            <div class="feature-body">
+                                <ul class="feature-list">
+                                    <li><strong>Выдвижная боковая панель</strong> с документацией</li>
+                                    <li><strong>Источники данных</strong> с таблицей показателей и ограничений</li>
+                                    <li><strong>Кейсы использования</strong> для разных категорий пользователей</li>
+                                    <li><strong>Анализ аналогов</strong> с сравнением с другими платформами</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Пользовательский интерфейс -->
+                        <div class="feature-card card-green">
+                            <div class="feature-header">
+                                <div class="feature-icon">🎨</div>
+                                <h3 class="feature-title">Пользовательский интерфейс</h3>
+                            </div>
+                            <div class="feature-body">
+                                <ul class="feature-list">
+                                    <li><strong>Современный дизайн</strong> с тёмной темой и градиентами</li>
+                                    <li><strong>Адаптивная верстка</strong> для всех типов устройств</li>
+                                    <li><strong>Плавные анимации</strong> и интуитивная навигация</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-banner">
+                        <div class="stat-item">
+                            <span class="stat-number">6</span>
+                            <span class="stat-label">Основных разделов</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">30+</span>
+                            <span class="stat-label">Реализованных функций</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">100%</span>
+                            <span class="stat-label">Адаптивность</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">3</span>
+                            <span class="stat-label">Страницы</span>
+                        </div>
+                    </div>
+
+                    <div class="tech-stack">
+                        <h3>🛠️ Используемые технологии</h3>
+                        <div class="tech-items">
+                            <span class="tech-badge">HTML5</span>
+                            <span class="tech-badge">CSS3</span>
+                            <span class="tech-badge">JavaScript (ES6+)</span>
+                            <span class="tech-badge">Leaflet.js</span>
+                            <span class="tech-badge">Chart.js</span>
+                            <span class="tech-badge">OpenStreetMap</span>
+                            <span class="tech-badge">LocalStorage API</span>
+                            <span class="tech-badge">Intersection Observer</span>
+                            <span class="tech-badge">Responsive Design</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Раздел: Предложить свой вариант -->
+        <section id="suggestions" class="section reveal">
+            <div class="container">
+                <h2><span class="icon icon-idea" aria-hidden="true">💡</span> Предложить свой вариант реализации</h2>
+                <div class="card">
+                    <p>
+                        У вас есть идеи по улучшению платформы или альтернативные варианты реализации функций? 
+                        Предложите свой вариант! Мы рассмотрим все предложения.
+                    </p>
+                    <form id="suggestionForm" style="margin-top: 24px;">
+                        <div class="form-group">
+                            <label>Ваше имя <span style="color: var(--danger);">*</span></label>
+                            <input type="text" class="form-input" id="suggestionName" placeholder="Как к вам обращаться?" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Email <span style="color: var(--danger);">*</span></label>
+                            <input type="email" class="form-input" id="suggestionEmail" placeholder="name@example.com" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Ваше предложение <span style="color: var(--danger);">*</span></label>
+                            <textarea class="form-input" id="suggestionText" rows="6" placeholder="Опишите ваш вариант реализации или идею по улучшению..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn">Отправить предложение</button>
+                    </form>
+                    <p style="margin-top: 16px; font-size: 13px; color: var(--muted);">
+                        Ваше сообщение будет отправлено на почту harkovasofia2@gmail.com. Мы рассмотрим все предложения.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div>
+                © <span id="year"></span> Экология Брянской области. Проект сделан Харьковой Софией.
+            </div>
+            <nav class="nav">
+                <a href="index.html">Главная</a>
+                <a href="overview.html">Обзор</a>
+                <a href="personal.html">Личный вклад</a>
+                <a href="comparison.html">Сравнение</a>
+                <a href="news.html">Новости</a>
+            </nav>
+        </div>
+    </footer>
+
+    <!-- Модальное окно калькулятора -->
+    <div id="calculatorModal" class="modal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header" style="background: linear-gradient(135deg, rgba(6,182,212,0.1), rgba(16,185,129,0.1)); border-bottom: 2px solid rgba(16,185,129,0.2);">
+                <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
+                    <div style="display: flex; align-items: center; justify-content: center; width: 80px; height: 80px; border-radius: 20px; background: linear-gradient(135deg, rgba(6,182,212,0.3), rgba(16,185,129,0.3)); border: 3px solid rgba(16,185,129,0.5); box-shadow: 0 4px 15px rgba(16,185,129,0.3);">
+                        <span style="font-size: 48px;">🧮</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <h2 class="calculator-title-gradient" style="margin: 0 0 8px; font-size: 32px;">
+                            Экологический калькулятор
+                        </h2>
+                        <p style="margin: 0 0 4px; color: var(--muted); font-size: 15px; line-height: 1.5;">
+                            🌍 Рассчитайте ваш углеродный след и получите персональные рекомендации
+                        </p>
+                        <p style="margin: 0; color: var(--muted); font-size: 13px; opacity: 0.8;">
+                            Узнайте, как ваш образ жизни влияет на окружающую среду
+                        </p>
+                    </div>
+                </div>
+                <button class="modal-close" id="btnCloseCalculator" style="margin-left: 20px;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 32px;">
+                <div style="text-align: center; margin-bottom: 32px; padding: 20px; background: rgba(16,185,129,0.05); border-radius: 12px; border: 1px solid rgba(16,185,129,0.15);">
+                    <p style="margin: 0 0 16px; color: var(--text); font-size: 16px; font-weight: 500;">
+                        💡 Заполните данные о вашем образе жизни, чтобы узнать ваш экологический след
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px;">
+                        <span style="display: inline-block; padding: 6px 12px; background: rgba(6,182,212,0.15); border-radius: 8px; font-size: 13px; color: var(--primary); border: 1px solid rgba(6,182,212,0.3);">
+                            💡 Пример: 500 км/мес на авто
+                        </span>
+                        <span style="display: inline-block; padding: 6px 12px; background: rgba(16,185,129,0.15); border-radius: 8px; font-size: 13px; color: var(--accent); border: 1px solid rgba(16,185,129,0.3);">
+                            ⚡ Среднее: 200 кВт·ч/мес
+                        </span>
+                        <span style="display: inline-block; padding: 6px 12px; background: rgba(6,182,212,0.15); border-radius: 8px; font-size: 13px; color: var(--primary); border: 1px solid rgba(6,182,212,0.3);">
+                            🏠 Газ: 50-100 м³/мес
+                        </span>
+                    </div>
+                </div>
+                <div class="grid-2" style="margin-top: 24px;">
+                    <div>
+                        <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+                            <span style="font-size: 24px;">🚗</span>
+                            <span>Транспорт</span>
+                        </h3>
+                        <div class="form-group">
+                            <label>Поездки на автомобиле (км/месяц)</label>
+                            <input type="number" id="calcCar" class="form-input" value="0" min="0" placeholder="Например: 500" />
+                            <small style="display: block; margin-top: 4px; color: var(--muted); font-size: 12px;">💡 Средний показатель: 300-800 км/месяц</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Поездки на общественном транспорте (км/месяц)</label>
+                            <input type="number" id="calcPublic" class="form-input" value="0" min="0" placeholder="Например: 200" />
+                            <small style="display: block; margin-top: 4px; color: var(--muted); font-size: 12px;">🚌 Автобус, трамвай, метро</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Перелёты (часов/год)</label>
+                            <input type="number" id="calcFlights" class="form-input" value="0" min="0" placeholder="Например: 10" />
+                            <small style="display: block; margin-top: 4px; color: var(--muted); font-size: 12px;">✈️ Один перелёт ≈ 2-3 часа</small>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+                            <span style="font-size: 24px;">⚡</span>
+                            <span>Энергия и отходы</span>
+                        </h3>
+                        <div class="form-group">
+                            <label>Потребление электроэнергии (кВт·ч/месяц)</label>
+                            <input type="number" id="calcEnergy" class="form-input" value="0" min="0" placeholder="Например: 200" />
+                            <small style="display: block; margin-top: 4px; color: var(--muted); font-size: 12px;">⚡ Среднее для квартиры: 150-300 кВт·ч/мес</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Потребление газа (м³/месяц)</label>
+                            <input type="number" id="calcGas" class="form-input" value="0" min="0" placeholder="Например: 80" />
+                            <small style="display: block; margin-top: 4px; color: var(--muted); font-size: 12px;">🏠 Среднее: 50-150 м³/месяц (отопление, готовка)</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Отходы (кг/месяц)</label>
+                            <input type="number" id="calcWaste" class="form-input" value="0" min="0" placeholder="Например: 30" />
+                            <small style="display: block; margin-top: 4px; color: var(--muted); font-size: 12px;">♻️ Среднее: 20-40 кг/месяц на человека</small>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 40px;">
+                    <button id="btnCalculate" class="btn" style="padding: 16px 40px; font-size: 16px; font-weight: 700; background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; box-shadow: 0 6px 20px rgba(16,185,129,0.4); transition: all 0.3s ease;">
+                        <span style="margin-right: 10px; font-size: 20px;">🧮</span>
+                        Рассчитать углеродный след
+                    </button>
+                </div>
+                <div id="calcResult" style="margin-top: 40px; display: none; animation: fadeInUp 0.5s ease;">
+                    <div class="card" style="background: linear-gradient(135deg, rgba(16,185,129,0.18), rgba(6,182,212,0.18)); border: 2px solid rgba(16,185,129,0.5); padding: 32px; box-shadow: 0 8px 30px rgba(16,185,129,0.2);">
+                        <div style="text-align: center; margin-bottom: 24px;">
+                            <div style="font-size: 64px; margin-bottom: 16px;">🌍</div>
+                            <h3 style="margin: 0 0 12px; font-size: 24px;">Ваш углеродный след</h3>
+                            <div style="font-size: 42px; font-weight: 800; color: var(--accent); margin: 20px 0; text-shadow: 0 2px 10px rgba(16,185,129,0.3);">
+                                <span id="calcTotal"></span> <span style="font-size: 20px; color: var(--muted); font-weight: 600;">тонн CO₂/год</span>
+                            </div>
+                        </div>
+                        <div id="calcRecommendations" style="margin-top: 24px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/features.js"></script>
+    <script src="assets/js/app.js"></script>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Постоянная кнопка «История / Экология» на всех вкладках
+        (function initGlobalModeToggle() {
+            const MODE_KEY = 'bryanskEcoMode'
+            const btn = document.getElementById('modeToggle')
+            const main = document.getElementById('modeToggleMain')
+            const badge = document.getElementById('modeToggleBadge')
+            if (!btn || !main || !badge) return
+
+            function apply(mode) {
+                const isHistory = mode === 'history'
+                document.body.classList.toggle('mode-history', isHistory)
+                document.body.classList.toggle('mode-eco', !isHistory)
+                if (isHistory) {
+                    main.textContent = 'История'
+                    badge.textContent = 'Экология'
+                } else {
+                    main.textContent = 'Экология'
+                    badge.textContent = 'История'
+                }
+            }
+
+            let mode = 'eco'
+            try {
+                const saved = localStorage.getItem(MODE_KEY)
+                if (saved === 'history' || saved === 'eco') mode = saved
+            } catch (e) {}
+            apply(mode)
+
+            btn.addEventListener('click', () => {
+                const currentIsHistory = document.body.classList.contains('mode-history')
+                const nextMode = currentIsHistory ? 'eco' : 'history'
+                try { localStorage.setItem(MODE_KEY, nextMode) } catch (e) {}
+                apply(nextMode)
+                const hash = nextMode === 'history' ? '#history-knowledge' : ''
+                window.location.href = 'index.html' + hash
+            })
+
+            window.addEventListener('storage', (e) => {
+                if (e.key !== MODE_KEY || !e.newValue) return
+                if (e.newValue === 'history' || e.newValue === 'eco') apply(e.newValue)
+            })
+        })()
+
+        // Система вкладок с плавными переходами
+        function initRequirementsTabs() {
+            const tabs = document.querySelectorAll('.requirements-tab-btn');
+            const panels = document.querySelectorAll('.requirements-tab-panel');
+            const TAB_KEY = 'bryanskRequirementsActiveTab';
+
+            function activate(target) {
+                const targetPanel = document.getElementById('tab-' + target);
+                if (!targetPanel) return;
+
+                panels.forEach(p => {
+                    if (p.classList.contains('active')) {
+                        p.style.opacity = '0';
+                        p.style.transform = 'translateY(10px)';
+                        setTimeout(() => {
+                            p.classList.remove('active');
+                        }, 200);
+                    }
+                });
+
+                tabs.forEach(t => t.classList.remove('active'));
+                const btn = document.querySelector('.requirements-tab-btn[data-tab="' + target + '"]');
+                if (btn) btn.classList.add('active');
+
+                setTimeout(() => {
+                    targetPanel.classList.add('active');
+                    setTimeout(() => {
+                        targetPanel.style.opacity = '1';
+                        targetPanel.style.transform = 'translateY(0)';
+                    }, 10);
+                }, 200);
+            }
+
+            let initialTab = null
+            try { initialTab = localStorage.getItem(TAB_KEY) } catch (e) {}
+            if (!initialTab) {
+                const currentActivePanel = document.querySelector('.requirements-tab-panel.active');
+                if (currentActivePanel && currentActivePanel.id) initialTab = currentActivePanel.id.replace('tab-', '');
+            }
+            if (initialTab) activate(initialTab);
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetTab = tab.getAttribute('data-tab');
+                    activate(targetTab);
+                    try { localStorage.setItem(TAB_KEY, targetTab) } catch (e) {}
+                });
+            });
+
+            window.addEventListener('storage', (e) => {
+                if (e.key !== TAB_KEY || !e.newValue) return;
+                activate(e.newValue);
+            });
+        }
+
+        // Инициализация вкладок при загрузке страницы
+        initRequirementsTabs();
+
+        // Обработка формы предложений с отправкой на email
+        const suggestionForm = document.getElementById('suggestionForm');
+        if (suggestionForm) {
+            suggestionForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('suggestionName').value;
+                const email = document.getElementById('suggestionEmail').value;
+                const text = document.getElementById('suggestionText').value;
+                
+                // Формируем mailto ссылку для отправки на email
+                const subject = encodeURIComponent('Обратная связь с сайта Экология Брянской области');
+                const body = encodeURIComponent(`Имя: ${name}\nEmail: ${email}\n\nСообщение:\n${text}`);
+                const mailtoLink = `mailto:harkovasofia2@gmail.com?subject=${subject}&body=${body}`;
+                
+                // Открываем почтовый клиент
+                window.location.href = mailtoLink;
+                
+                // Также сохраняем в localStorage как резервный вариант
+                const suggestions = JSON.parse(localStorage.getItem('suggestions') || '[]');
+                suggestions.push({
+                    name: name,
+                    email: email,
+                    text: text,
+                    date: new Date().toISOString()
+                });
+                localStorage.setItem('suggestions', JSON.stringify(suggestions));
+                
+                // Очистка формы
+                setTimeout(() => {
+                    suggestionForm.reset();
+                    alert('Спасибо! Откроется окно вашего почтового клиента для отправки сообщения на harkovasofia2@gmail.com. Если окно не открылось, скопируйте адрес: harkovasofia2@gmail.com');
+                }, 500);
+            });
+        }
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((e) => {
+                if (e.isIntersecting) e.target.classList.add('visible');
+            });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+    </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+{
+  "name": "Экология Брянской области",
+  "short_name": "Экология Брянск",
+  "description": "Интерактивная платформа для мониторинга экологической ситуации в Брянской области",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a1929",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["environment", "education", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Карта",
+      "short_name": "Карта",
+      "description": "Открыть интерактивную карту",
+      "url": "/#map",
+      "icons": [{ "src": "assets/icons/map-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Калькулятор",
+      "short_name": "Калькулятор",
+      "description": "Рассчитать углеродный след",
+      "url": "/#calculator",
+      "icons": [{ "src": "assets/icons/calc-icon.png", "sizes": "96x96" }]
+    }
+  ]
+}
+

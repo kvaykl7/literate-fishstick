@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Обзор — Экология Брянской области</title>
+    <meta name="description" content="Аналитический обзор экологической ситуации в Брянской области: графики, карта, глоссарий и библиотека открытых данных." />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <style>
+        /* Стили страницы «Обзор» */
+        .page-overview main .container { max-width: 1120px; }
+        .page-overview .hero .lead { max-width: 800px; }
+        .page-overview .map { min-height: 460px; }
+        .page-overview #greenPointsList li { grid-template-columns: 1fr auto; }
+        /* (админ-панель вынесена в глобальный интерфейс) */
+    </style>
+</head>
+<body class="page-overview">
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <a href="index.html" class="logo" aria-hidden="true" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">🌿</a>
+                <div>
+                    <h1>Экологический профиль региона</h1>
+                    <p class="tagline">Обзор · Личный вклад · Сравнение</p>
+                </div>
+            </div>
+            <nav class="nav">
+                <a href="overview.html" class="nav-link" aria-current="page">Обзор</a>
+                <a href="personal.html" class="nav-link">Личный вклад</a>
+                <a href="comparison.html" class="nav-link">Сравнение</a>
+                <a href="news.html" class="nav-link">Новости</a>
+                <button id="modeToggle" class="mode-toggle" type="button" aria-label="Переключить режим">
+                    <span id="modeToggleMain">Экология</span>
+                    <span id="modeToggleBadge" class="mode-toggle-badge">История</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <a href="index.html" class="btn-back">← На главную</a>
+        </div>
+        <section class="section hero reveal">
+            <div class="container">
+                <h2><span class="icon icon-leaf" aria-hidden="true">🌿</span> Обзор экологического профиля региона</h2>
+                <p class="lead">
+                    Здесь собраны все ключевые показатели состояния окружающей среды в Брянской области: 
+                    динамика загрязняющих веществ, состояние поверхностных вод, карта чистых и проблемных зон,
+                    список предприятий‑загрязнителей, глоссарий терминов и библиотека открытых данных.
+                </p>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container grid-2">
+                <div>
+                    <div class="card kpi">
+                        <h3>Ключевые показатели</h3>
+                        <div class="kpi-grid">
+                            <div class="kpi-item">
+                                <div class="kpi-value" id="kpi-air">—</div>
+                                <div class="kpi-label">Индекс качества воздуха (AQI)</div>
+                            </div>
+                            <div class="kpi-item">
+                                <div class="kpi-value" id="kpi-water">—</div>
+                                <div class="kpi-label">Индекс качества воды</div>
+                            </div>
+                            <div class="kpi-item">
+                                <div class="kpi-value" id="kpi-clean">—</div>
+                                <div class="kpi-label">Чистых локаций</div>
+                            </div>
+                            <div class="kpi-item">
+                                <div class="kpi-value" id="kpi-dirty">—</div>
+                                <div class="kpi-label">Проблемных локаций</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="card">
+                        <h3>Как читать показатели</h3>
+                        <ul class="highlights">
+                            <li><strong>AQI</strong> — интегральный индекс качества воздуха (чем ниже, тем лучше).</li>
+                            <li><strong>Индекс воды</strong> — сводный показатель по мутности, нитратам, БПК<sub>5</sub>, pH.</li>
+                            <li><strong>Чистые локации</strong> — парки, леса, зоны отдыха с благоприятной экологией.</li>
+                            <li><strong>Проблемные локации</strong> — промзоны, свалки, участки с превышением нормативов.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2><span class="icon icon-wind" aria-hidden="true">💨</span> Качество атмосферного воздуха</h2>
+                <p>
+                    График показывает усреднённые концентрации основных загрязнителей воздуха в Брянской области:
+                    <span class="term" title="PM2.5 и PM10 — взвешенные частицы пыли, которые проникают глубоко в дыхательные пути. Чем выше концентрация, тем выше риск для здоровья.">PM2.5 и PM10</span>,
+                    NO₂ и SO₂. Данные демонстрационные и могут быть заменены официальными.
+                </p>
+                <div class="card">
+                    <canvas id="airChart" height="110"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2><span class="icon icon-water" aria-hidden="true">💧</span> Состояние поверхностных вод</h2>
+                <p>
+                    Индекс качества воды строится по мутности, содержанию нитратов,
+                    <span class="term" title="БПК₅ — сколько кислорода нужно воде, чтобы разложить органические вещества за 5 суток. Чем выше значение, тем сильнее загрязнение.">БПК<sub>5</sub></span>,
+                    pH и другим параметрам. На диаграмме можно сравнить Брянскую область со средними значениями по соседним регионам.
+                </p>
+                <div class="card">
+                    <canvas id="waterChart" height="110"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2><span class="icon icon-alert" aria-hidden="true">⚠️</span> Потенциально загрязнённые территории</h2>
+                <div class="card">
+                    <ul id="pollutionList" class="pollution-list"></ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2><span class="icon icon-alert" aria-hidden="true">🏭</span> Предприятия и вклад в загрязнение</h2>
+                <p class="muted">
+                    Демонстрационные данные по вкладу крупнейших предприятий в общий объём выбросов.
+                    В дальнейшем здесь могут быть размещены официальные открытые данные.
+                </p>
+                <div class="grid-2">
+                    <div class="card">
+                        <canvas id="emittersChart" height="120"></canvas>
+                        <div class="emitters-chart-nav" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;">
+                            <button type="button" id="emittersChartPrev" class="btn btn-secondary" aria-label="Предыдущие предприятия">←</button>
+                            <div id="emittersChartPageInfo" class="muted" style="font-size:13px;text-align:center;flex:1;">—</div>
+                            <button type="button" id="emittersChartNext" class="btn btn-secondary" aria-label="Следующие предприятия">→</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <ul id="emittersList" class="emitters-list"></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2><span class="icon icon-map" aria-hidden="true">📍</span> Карта чистых и проблемных мест</h2>
+                <p>
+                    Интерактивная карта помогает увидеть распределение чистых и проблемных зон по территории Брянской области.
+                    Вы можете включать и выключать слои, а также добавлять собственные точки.
+                </p>
+                <div id="mapContainer" class="map"></div>
+
+                <div class="filters card">
+                    <div class="filters-row">
+                        <label>
+                            <input type="checkbox" id="toggleClean" checked />
+                            Показывать чистые локации
+                        </label>
+                        <label>
+                            <input type="checkbox" id="toggleDirty" checked />
+                            Показывать проблемные локации
+                        </label>
+                        <label>
+                            <input type="checkbox" id="toggleClusters" checked />
+                            Кластеры
+                        </label>
+                        <label>
+                            <input type="checkbox" id="toggleHeat" />
+                            Тепловая карта
+                        </label>
+                        <label>
+                            <input type="checkbox" id="toggleGreen" checked />
+                            Зелёные точки (приём вторсырья)
+                        </label>
+                        <button id="btnAddPoint" class="btn">Добавить точку кликом</button>
+                    </div>
+                </div>
+
+                <!-- Модальное окно для добавления метки -->
+                <div id="markerModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Добавить метку на карте</h3>
+                            <button class="modal-close" id="modalClose">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Тип точки</label>
+                                <select id="markerType" class="form-input">
+                                    <option value="clean">Чистая локация</option>
+                                    <option value="dirty">Проблемная локация</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Название <span style="color: var(--danger);">*</span></label>
+                                <input type="text" id="markerName" class="form-input" placeholder="Введите название локации" required />
+                            </div>
+                            <div class="form-group" id="markerNoteGroup">
+                                <label>Примечание</label>
+                                <input type="text" id="markerNote" class="form-input" placeholder="Опционально" />
+                            </div>
+                            <div class="form-group" id="markerSeverityGroup" style="display:none;">
+                                <label>Степень загрязнения</label>
+                                <select id="markerSeverity" class="form-input">
+                                    <option value="низкая">Низкая</option>
+                                    <option value="средняя" selected>Средняя</option>
+                                    <option value="высокая">Высокая</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="markerPollutantGroup" style="display:none;">
+                                <label>Загрязнитель</label>
+                                <input type="text" id="markerPollutant" class="form-input" placeholder="Например: PM10, NO₂" />
+                            </div>
+                            <div class="modal-footer">
+                                <button id="markerCancel" class="btn btn-secondary">Отмена</button>
+                                <button id="markerSubmit" class="btn">Добавить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2><span class="icon icon-map" aria-hidden="true">♻️</span> Зелёные точки — пункты приёма вторсырья</h2>
+                <p>
+                    Адреса, где в Брянске и области принимают стекло, пластик, макулатуру, батарейки и одежду.
+                    Данные уточняются по 2ГИС и соцсетям; список можно расширять.
+                </p>
+                <div class="card">
+                    <ul id="greenPointsList" class="pollution-list"></ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2><span class="icon icon-idea" aria-hidden="true">📝</span> Глоссарий терминов</h2>
+                <p class="muted">Подсказки к сложным показателям. На странице при наведении на слова с классом <code>term</code> отображается подсказка.</p>
+                <div class="card">
+                    <ul class="highlights">
+                        <li><strong>AQI</strong> — интегральный индекс качества воздуха; чем ниже, тем лучше.</li>
+                        <li><strong>PM2.5, PM10</strong> — взвешенные частицы пыли, проникают в дыхательные пути.</li>
+                        <li><strong>БПК<sub>5</sub></strong> — биологическое потребление кислорода за 5 суток; выше — сильнее загрязнение воды органикой.</li>
+                        <li><strong>NO₂</strong> — диоксид азота. <strong>SO₂</strong> — диоксид серы.</li>
+                        <li><strong>VOC</strong> — летучие органические соединения. <strong>ЛВЖ</strong> — легковоспламеняющиеся жидкости.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section reveal" id="feedback">
+            <div class="container">
+                <h2><span class="icon icon-idea" aria-hidden="true">💬</span> Обратная связь</h2>
+                <div class="card">
+                    <p>
+                        Если вы заметили неточность в данных, хотите предложить улучшение или поделиться своим кейсом,
+                        напишите нам. Сообщения поступают на адрес <strong>harkovasofia2@gmail.com</strong>.
+                    </p>
+                    <form id="overviewFeedbackForm" style="margin-top: 20px;">
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Имя</label>
+                                <input type="text" id="overviewName" class="form-input" placeholder="Как к вам обращаться?" />
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="overviewEmail" class="form-input" placeholder="name@example.com" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Сообщение</label>
+                            <textarea id="overviewMessage" class="form-input" rows="4" placeholder="Опишите проблему или предложение…"></textarea>
+                        </div>
+                        <button type="submit" class="btn">Отправить сообщение</button>
+                        <p class="muted" style="margin-top: 8px; font-size: 12px;">
+                            После нажатия откроется почтовый клиент с подготовленным письмом.
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div>
+                © <span id="year"></span> Экология Брянской области. Проект сделан Харьковой Софией.
+            </div>
+            <nav class="nav">
+                <a href="index.html">Главная</a>
+                <a href="overview.html">Обзор</a>
+                <a href="personal.html">Личный вклад</a>
+                <a href="comparison.html">Сравнение</a>
+                <a href="news.html">Новости</a>
+            </nav>
+        </div>
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- App -->
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/features.js"></script>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Простая отправка письма через почтовый клиент
+        const overviewForm = document.getElementById('overviewFeedbackForm');
+        if (overviewForm) {
+            overviewForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const name = document.getElementById('overviewName').value || 'Аноним';
+                const email = document.getElementById('overviewEmail').value || 'не указан';
+                const message = document.getElementById('overviewMessage').value || '';
+
+                const subject = encodeURIComponent('Обратная связь — раздел «Обзор»');
+                const body = encodeURIComponent(
+                    `Имя: ${name}\nEmail: ${email}\n\nСообщение:\n${message}`
+                );
+                window.location.href = `mailto:harkovasofia2@gmail.com?subject=${subject}&body=${body}`;
+            });
+        }
+
+        // Зелёные точки — пункты приёма вторсырья (загрузка списка)
+        const greenList = document.getElementById('greenPointsList');
+        const greenPointsFallback = [
+            { name: 'Пункт приёма вторсырья (центр Брянска)', address: 'ул. Красноармейская', types: ['стекло', 'пластик', 'бумага'], note: 'Контейнеры у супермаркета' },
+            { name: 'Экоконтейнер — батарейки и техника', address: 'пр. Ленина, у ТЦ', types: ['батарейки', 'мелкая техника'], note: 'У крупного супермаркета' },
+            { name: 'Благотворительный пункт сбора одежды', address: 'ул. Фокина', types: ['одежда'], note: 'Вещи в хорошем состоянии' },
+            { name: 'Пункт приёма макулатуры', address: 'Бежицкий район', types: ['бумага', 'картон'], note: 'По предварительной записи' },
+            { name: 'Контейнеры для пластика', address: 'Советский район, жилые массивы', types: ['пластик'], note: 'Жёлтые контейнеры во дворах' }
+        ];
+        function renderGreenList(arr) {
+            if (!greenList || !arr || !arr.length) return;
+            greenList.innerHTML = arr.map(p => `
+                <li>
+                    <div>
+                        <strong>${p.name}</strong>
+                        <div style="color:var(--muted);font-size:12px;margin-top:2px;">${p.address || ''} · ${(p.types || []).join(', ')}</div>
+                        ${p.note ? '<div style="color:var(--muted);font-size:11px;margin-top:4px;">' + p.note + '</div>' : ''}
+                    </div>
+                    <span class="badge good">Приём</span>
+                </li>
+            `).join('');
+        }
+        if (greenList) {
+            fetch('data/green_points.json')
+                .then(r => r.json())
+                .then(arr => { if (arr && arr.length) renderGreenList(arr); else renderGreenList(greenPointsFallback); })
+                .catch(() => renderGreenList(greenPointsFallback));
+        }
+
+        // Постоянная кнопка «История / Экология» на всех вкладках
+        (function initGlobalModeToggle() {
+            const MODE_KEY = 'bryanskEcoMode'
+            const btn = document.getElementById('modeToggle')
+            const main = document.getElementById('modeToggleMain')
+            const badge = document.getElementById('modeToggleBadge')
+            if (!btn || !main || !badge) return
+
+            function apply(mode) {
+                const isHistory = mode === 'history'
+                document.body.classList.toggle('mode-history', isHistory)
+                document.body.classList.toggle('mode-eco', !isHistory)
+                if (isHistory) {
+                    main.textContent = 'История'
+                    badge.textContent = 'Экология'
+                } else {
+                    main.textContent = 'Экология'
+                    badge.textContent = 'История'
+                }
+            }
+
+            let mode = 'eco'
+            try {
+                const saved = localStorage.getItem(MODE_KEY)
+                if (saved === 'history' || saved === 'eco') mode = saved
+            } catch (e) {}
+            apply(mode)
+
+            btn.addEventListener('click', () => {
+                const currentIsHistory = document.body.classList.contains('mode-history')
+                const nextMode = currentIsHistory ? 'eco' : 'history'
+                try { localStorage.setItem(MODE_KEY, nextMode) } catch (e) {}
+                apply(nextMode)
+                const hash = nextMode === 'history' ? '#history-knowledge' : ''
+                window.location.href = 'index.html' + hash
+            })
+
+            window.addEventListener('storage', (e) => {
+                if (e.key !== MODE_KEY || !e.newValue) return
+                if (e.newValue === 'history' || e.newValue === 'eco') apply(e.newValue)
+            })
+        })()
+    </script>
+</body>
+</html>
+

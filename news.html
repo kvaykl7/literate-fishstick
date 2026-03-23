@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Новости — Экология Брянской области</title>
+    <meta name="description" content="Последние новости об экологических проектах и инициативах Брянской области." />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <style>
+        .page-news main .container { max-width: 1120px; }
+        .page-news .news-hero .lead { max-width: 640px; }
+        .page-news .news-tabs {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 8px;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x proximity;
+            padding-bottom: 6px;
+            margin-top: 20px;
+        }
+        .page-news .news-tab-btn {
+            flex: 0 0 auto;
+            scroll-snap-align: start;
+            min-height: 44px;
+            padding: 10px 18px;
+            font-size: 15px;
+            touch-action: manipulation;
+        }
+        .page-news .news-tab-panel#tab-news-list .grid-2 {
+            align-items: start;
+        }
+        @media (max-width: 720px) {
+            .page-news .news-hero h2 { font-size: 26px; }
+            .page-news .news-hero { padding-top: 56px; text-align: left; }
+            .page-news .news-hero .lead { margin-left: 0; margin-right: 0; }
+            .page-news .news-card h3 { font-size: 17px; line-height: 1.35; }
+            .page-news .news-card p { font-size: 14px; line-height: 1.55; }
+            .page-news .news-sidebar .news-subscribe form .btn { width: 100%; }
+            .page-news .action-btn { padding: 14px 14px; min-height: 48px; }
+        }
+    </style>
+</head>
+<body class="page-news">
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <a href="index.html" class="logo" aria-hidden="true" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">🌿</a>
+                <div>
+                    <h1>Экологический профиль региона</h1>
+                    <p class="tagline">Обзор · Личный вклад · Сравнение</p>
+                </div>
+            </div>
+            <nav class="nav">
+                <a href="overview.html" class="nav-link">Обзор</a>
+                <a href="personal.html" class="nav-link">Личный вклад</a>
+                <a href="comparison.html" class="nav-link">Сравнение</a>
+                <a href="news.html" class="nav-link" aria-current="page">Новости</a>
+                <button id="modeToggle" class="mode-toggle" type="button" aria-label="Переключить режим">
+                    <span id="modeToggleMain">Экология</span>
+                    <span id="modeToggleBadge" class="mode-toggle-badge">История</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <a href="index.html" class="btn-back">← На главную</a>
+        </div>
+        <section class="section news-hero reveal">
+            <div class="container">
+                <h2>Новости и инициативы</h2>
+                <p class="lead">
+                    Подборка свежих материалов о качестве окружающей среды, модернизации инфраструктуры и общественных мероприятиях, которые помогают делать Брянскую область чище и безопаснее.
+                </p>
+            </div>
+        </section>
+
+        <section class="section reveal">
+            <div class="container">
+                <h2>Последние обновления</h2>
+
+                <div class="news-tabs">
+                    <button class="news-tab-btn active" data-tab="news-list">Новости</button>
+                    <button class="news-tab-btn" data-tab="eco-calendar">Экологические праздники</button>
+                </div>
+
+                <div class="news-tab-panel active" id="tab-news-list">
+                    <div class="grid-2">
+                        <div>
+                            <div class="news-grid">
+                        <article class="card news-card">
+                            <div class="news-meta">
+                                <span class="news-tag">12 ноября 2025</span>
+                                <span class="news-tag">Мониторинг</span>
+                            </div>
+                            <h3>В Брянской области на экологические программы выделят более 140 млн рублей</h3>
+                            <p>
+                                В Брянской области обсудили финансирование программы «Охрана окружающей среды, воспроизводство и использование природных ресурсов», сообщила пресс-служба регионального парламента.
+
+                                Сообщается, что на мероприятия по улучшению экологической ситуации в регионе будет направлено 65,8 млн рублей. В частности, 58,4 млн рублей планируется потратить на рекультивацию несанкционированной свалки в Дубровском районе.
+                                
+                                Кроме того, на работу лесопожарной службы и деятельность брянских лесничеств в рамках программы «Сохранение лесного хозяйства» предусмотрено 805,7 млн рублей
+                            </p>
+                            <a class="btn-link" href="https://guberniya.tv/obshhestvo/320941" target="_blank" rel="noopener">Подробнее на сайте Брянская губерния</a>
+                        </article>
+                        <article class="card news-card">
+                            <div class="news-meta">
+                                <span class="news-tag">17 ноября 2025</span>
+                                <span class="news-tag">Общество</span>
+                            </div>
+                            <h3>Брянские школьники-экологи вернулись с наградами со Всероссийского форума</h3>
+                            <p>
+                                Старшеклассников Снежской гимназии на Всероссийском экологическом форуме в Челябинске признали победителями в экологическом просвещении и в народном голосовании. 
+                                Шефствующее над учебным заведением предприятие - Брянский сыродельный завод «Мирослава» - купил дополнительное оборудование для занятий ребят.
+                                Команда юных экологов из Снежской гимназии завоевала две высшие награды на всероссийском детском форуме в Челябинске.
+                                В гимназии устроили чествование победителей с участием руководителей шефствующего предприятия.
+                            </p>
+                            <a class="btn-link" href="https://guberniya.tv/obshhestvo/321378" target="_blank" rel="noopener">Подробнее на сайте Брянская губерния</a>
+                        </article>
+                        <article class="card news-card">
+                            <div class="news-meta">
+                                <span class="news-tag"> 29 октября 2025</span>
+                                <span class="news-tag">На нас ответственность</span>
+                            </div>
+                            <h3>За 9 месяцев 2025 года на Брянщине пресекли 40 экологических преступлений</h3>
+                            <p>
+                                За девять месяцев 2025 года, с января по сентябрь, в Брянской области зарегистрировали 40 экологических преступлений. В том числе 15 нарушителей незаконно вырубали лес. Пресекались также незаконная ловля рыбы и охота, а также уничтожение и повреждение деревьев.
+                                В частности, преступления были совершены на территории Дятьково и в десяти районах региона: Выгоничском, Дубровском, Жуковском, Клинцовском, Климовском, Комаричском, Красногорском, Мглинском, Навлинском и Трубчевском районах.
+                                Общая сумма причинённого ущерба составила 4 миллиона рублей. В прошлом году она была в разы выше — 22 миллиона.
+                            </p>
+                            <a class="btn-link" href="https://riastrela.ru/p/206256/" target="_blank" rel="noopener">Подробнее на сайте Стрела</a>
+                        </article>
+                        <article class="card news-card">
+                            <div class="news-meta">
+                                <span class="news-tag">9 сентября 2025</span>
+                                <span class="news-tag">Чистая Родина - наша обязанность!</span>
+                            </div>
+                            <h3>В Брянской области снизился ущерб от экологических преступлений</h3>
+                            <p>
+                                Региональная прокуратура поделилась соответствующей статистикой.
+                                За первые десять месяцев года на территории Брянской области зарегистрировано 44 экологических преступления. Динамика осталась примерно на уровне прошлого года, когда их было зафиксировано 43.
+                                В частности, выявлено 16 случаев незаконной рубки леса; в 2024 году их было 24.
+                            </p>
+                            <a class="btn-link" href="https://newsbryansk.ru/fn_1755775.html" target="_blank" rel="noopener">Страница проекта «Новости Брянска»</a>
+                        </article>
+                    </div>
+                </div>
+                <aside class="card news-sidebar">
+                    <div class="news-subscribe">
+                        <h3>📬 Подписка на рассылку</h3>
+                        <p class="muted">Получайте подборку новостей и мероприятий раз в две недели на электронную почту.</p>
+                        <form id="newsSubscribeForm">
+                            <input type="email" class="form-input" id="subscribeEmail" placeholder="name@example.com" aria-label="Электронная почта для рассылки" required />
+                            <button type="submit" class="btn">Подписаться</button>
+                        </form>
+                        <p id="subscribeStatus" class="muted" style="margin: 8px 0 0; font-size: 13px; min-height: 1.2em;" role="status" aria-live="polite"></p>
+                        <span class="muted">Нажимая «Подписаться», вы соглашаетесь на обработку персональных данных.</span>
+                    </div>
+                    
+                    <div class="quick-actions-section">
+                        <h4>⚡ Быстрые действия</h4>
+                        <div class="quick-actions">
+                            <a href="index.html#map" class="action-btn">
+                                <span class="action-icon">📍</span>
+                                <span class="action-text">Добавить точку на карту</span>
+                            </a>
+                            <a href="index.html#actions" class="action-btn">
+                                <span class="action-icon">💡</span>
+                                <span class="action-text">Предложения по улучшению</span>
+                            </a>
+                            <a href="comparison.html" class="action-btn">
+                                <span class="action-icon">📊</span>
+                                <span class="action-text">Сравнение регионов</span>
+                            </a>
+                            <a href="overview.html#feedback" class="action-btn">
+                                <span class="action-icon">💬</span>
+                                <span class="action-text">Обратная связь</span>
+                            </a>
+                            <a href="https://www.bryanskobl.ru/" target="_blank" rel="noopener" class="action-btn">
+                                <span class="action-icon">🏛️</span>
+                                <span class="action-text">Портал правительства</span>
+                            </a>
+                        </div>
+                    </div>
+                </aside>
+                    </div>
+                </div>
+
+                <div class="news-tab-panel" id="tab-eco-calendar">
+                    <div class="card calendar-widget">
+                        <div class="calendar-header">
+                            <h2>🌍 Календарь экологических праздников</h2>
+                            <p class="calendar-subtitle">
+                                Список ключевых дат, которые можно использовать для проведения акций, уроков и мероприятий в Брянской области.
+                            </p>
+                        </div>
+                        <div class="holidays-section">
+                            <div class="holidays-list">
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🌱</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">11 января</div>
+                                        <div class="holiday-name">День заповедников и национальных парков России</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">💧</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">31 января</div>
+                                        <div class="holiday-name">Международный день очистки воды</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🐬</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">19 февраля</div>
+                                        <div class="holiday-name">Всемирный день защиты морских млекопитающих</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">❄️</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">28 февраля</div>
+                                        <div class="holiday-name">День Арктики</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🦌</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">3 марта</div>
+                                        <div class="holiday-name">Всемирный день дикой природы</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🌊</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">14 марта</div>
+                                        <div class="holiday-name">Международный день рек</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🌍</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">20 марта</div>
+                                        <div class="holiday-name">День Земли</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🐦</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">1 апреля</div>
+                                        <div class="holiday-name">Международный день птиц</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">📚</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">15 апреля</div>
+                                        <div class="holiday-name">День экологических знаний</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🛶</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">20 мая</div>
+                                        <div class="holiday-name">День Волги</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🧬</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">22 мая</div>
+                                        <div class="holiday-name">Международный день биологического разнообразия</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🚮</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">1 июня</div>
+                                        <div class="holiday-name">Международный день очистки водоёмов в России</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🌿</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">5 июня</div>
+                                        <div class="holiday-name">Всемирный день окружающей среды</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🎣</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">13 июля</div>
+                                        <div class="holiday-name">День действий против рыбной ловли в России</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🪷</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">27 августа</div>
+                                        <div class="holiday-name">Всемирный день озёр</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🌲</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">15 сентября</div>
+                                        <div class="holiday-name">Российские дни леса</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🧹</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">20 сентября</div>
+                                        <div class="holiday-name">Всемирный день чистоты</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🚲</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">22 сентября</div>
+                                        <div class="holiday-name">Всемирный день без автомобиля</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🐾</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">4 октября</div>
+                                        <div class="holiday-name">Всемирный день защиты животных</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🏞️</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">14 октября</div>
+                                        <div class="holiday-name">День работников заповедного дела</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">♻️</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">15 ноября</div>
+                                        <div class="holiday-name">День вторичной переработки</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">🐕</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">30 ноября</div>
+                                        <div class="holiday-name">Всемирный день домашних животных</div>
+                                    </div>
+                                </div>
+
+                                <div class="holiday-item">
+                                    <div class="holiday-icon">⚖️</div>
+                                    <div class="holiday-info">
+                                        <div class="holiday-date">10 декабря</div>
+                                        <div class="holiday-name">Международный день прав животных</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div>
+                © <span id="year"></span> Экология Брянской области. Проект сделан Харьковой Софией.
+            </div>
+            <nav class="nav">
+                <a href="index.html">Главная</a>
+                <a href="overview.html">Обзор</a>
+                <a href="personal.html">Личный вклад</a>
+                <a href="comparison.html">Сравнение</a>
+            </nav>
+        </div>
+    </footer>
+
+    <!-- Модальное окно калькулятора -->
+    <div id="calculatorModal" class="modal">
+        <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header" style="background: linear-gradient(135deg, rgba(6,182,212,0.1), rgba(16,185,129,0.1)); border-bottom: 2px solid rgba(16,185,129,0.2);">
+                <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
+                    <div style="display: flex; align-items: center; justify-content: center; width: 80px; height: 80px; border-radius: 20px; background: linear-gradient(135deg, rgba(6,182,212,0.3), rgba(16,185,129,0.3)); border: 3px solid rgba(16,185,129,0.5); box-shadow: 0 4px 15px rgba(16,185,129,0.3);">
+                        <span style="font-size: 48px;">🧮</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <h2 class="calculator-title-gradient" style="margin: 0 0 8px; font-size: 32px;">
+                            Экологический калькулятор
+                        </h2>
+                        <p style="margin: 0 0 4px; color: var(--muted); font-size: 15px; line-height: 1.5;">
+                            🌍 Рассчитайте ваш углеродный след и получите персональные рекомендации
+                        </p>
+                        <p style="margin: 0; color: var(--muted); font-size: 13px; opacity: 0.8;">
+                            Узнайте, как ваш образ жизни влияет на окружающую среду
+                        </p>
+                    </div>
+                </div>
+                <button class="modal-close" id="btnCloseCalculator" style="margin-left: 20px;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 32px;">
+                <div style="text-align: center; margin-bottom: 32px; padding: 20px; background: rgba(16,185,129,0.05); border-radius: 12px; border: 1px solid rgba(16,185,129,0.15);">
+                    <p style="margin: 0 0 16px; color: var(--text); font-size: 16px; font-weight: 500;">
+                        💡 Заполните данные о вашем образе жизни, чтобы узнать ваш экологический след
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px;">
+                        <span style="display: inline-block; padding: 6px 12px; background: rgba(6,182,212,0.15); border-radius: 8px; font-size: 13px; color: var(--primary); border: 1px solid rgba(6,182,212,0.3);">
+                            💡 Пример: 500 км/мес на авто
+                        </span>
+                        <span style="display: inline-block; padding: 6px 12px; background: rgba(16,185,129,0.15); border-radius: 8px; font-size: 13px; color: var(--accent); border: 1px solid rgba(16,185,129,0.3);">
+                            ⚡ Среднее: 200 кВт·ч/мес
+                        </span>
+                        <span style="display: inline-block; padding: 6px 12px; background: rgba(6,182,212,0.15); border-radius: 8px; font-size: 13px; color: var(--primary); border: 1px solid rgba(6,182,212,0.3);">
+                            🏠 Газ: 50-100 м³/мес
+                        </span>
+                    </div>
+                </div>
+                <div class="grid-2" style="margin-top: 24px;">
+                    <div>
+                        <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+                            <span style="font-size: 24px;">🚗</span>
+                            <span>Транспорт</span>
+                        </h3>
+                        <div class="form-group">
+                            <label>Поездки на автомобиле (км/месяц)</label>
+                            <input type="number" id="calcCar" class="form-input" value="0" min="0" placeholder="Например: 500" />
+                            <small style="display: block; margin-top: 4px; color: var(--muted); font-size: 12px;">💡 Средний показатель: 300-800 км/месяц</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Поездки на общественном транспорте (км/месяц)</label>
+                            <input type="number" id="calcPublic" class="form-input" value="0" min="0" placeholder="Например: 200" />
+                            <small style="display: block; margin-top: 4px; color: var(--muted); font-size: 12px;">🚌 Автобус, трамвай, метро</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Перелёты (часов/год)</label>
+                            <input type="number" id="calcFlights" class="form-input" value="0" min="0" placeholder="Например: 10" />
+                            <small style="display: block; margin-top: 4px; color: var(--muted); font-size: 12px;">✈️ Один перелёт ≈ 2-3 часа</small>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 20px;">
+                            <span style="font-size: 24px;">⚡</span>
+                            <span>Энергия и отходы</span>
+                        </h3>
+                        <div class="form-group">
+                            <label>Потребление электроэнергии (кВт·ч/месяц)</label>
+                            <input type="number" id="calcEnergy" class="form-input" value="0" min="0" placeholder="Например: 200" />
+                            <small style="display: block; margin-top: 4px; color: var(--muted); font-size: 12px;">⚡ Среднее для квартиры: 150-300 кВт·ч/мес</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Потребление газа (м³/месяц)</label>
+                            <input type="number" id="calcGas" class="form-input" value="0" min="0" placeholder="Например: 80" />
+                            <small style="display: block; margin-top: 4px; color: var(--muted); font-size: 12px;">🏠 Среднее: 50-150 м³/месяц (отопление, готовка)</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Отходы (кг/месяц)</label>
+                            <input type="number" id="calcWaste" class="form-input" value="0" min="0" placeholder="Например: 30" />
+                            <small style="display: block; margin-top: 4px; color: var(--muted); font-size: 12px;">♻️ Среднее: 20-40 кг/месяц на человека</small>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 40px;">
+                    <button id="btnCalculate" class="btn" style="padding: 16px 40px; font-size: 16px; font-weight: 700; background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; box-shadow: 0 6px 20px rgba(16,185,129,0.4); transition: all 0.3s ease;">
+                        <span style="margin-right: 10px; font-size: 20px;">🧮</span>
+                        Рассчитать углеродный след
+                    </button>
+                </div>
+                <div id="calcResult" style="margin-top: 40px; display: none; animation: fadeInUp 0.5s ease;">
+                    <div class="card" style="background: linear-gradient(135deg, rgba(16,185,129,0.18), rgba(6,182,212,0.18)); border: 2px solid rgba(16,185,129,0.5); padding: 32px; box-shadow: 0 8px 30px rgba(16,185,129,0.2);">
+                        <div style="text-align: center; margin-bottom: 24px;">
+                            <div style="font-size: 64px; margin-bottom: 16px;">🌍</div>
+                            <h3 style="margin: 0 0 12px; font-size: 24px;">Ваш углеродный след</h3>
+                            <div style="font-size: 42px; font-weight: 800; color: var(--accent); margin: 20px 0; text-shadow: 0 2px 10px rgba(16,185,129,0.3);">
+                                <span id="calcTotal"></span> <span style="font-size: 20px; color: var(--muted); font-weight: 600;">тонн CO₂/год</span>
+                            </div>
+                        </div>
+                        <div id="calcRecommendations" style="margin-top: 24px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/features.js"></script>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Постоянная кнопка «История / Экология» на всех вкладках
+        (function initGlobalModeToggle() {
+            const MODE_KEY = 'bryanskEcoMode'
+            const btn = document.getElementById('modeToggle')
+            const main = document.getElementById('modeToggleMain')
+            const badge = document.getElementById('modeToggleBadge')
+            if (!btn || !main || !badge) return
+
+            function apply(mode) {
+                const isHistory = mode === 'history'
+                document.body.classList.toggle('mode-history', isHistory)
+                document.body.classList.toggle('mode-eco', !isHistory)
+                if (isHistory) {
+                    main.textContent = 'История'
+                    badge.textContent = 'Экология'
+                } else {
+                    main.textContent = 'Экология'
+                    badge.textContent = 'История'
+                }
+            }
+
+            let mode = 'eco'
+            try {
+                const saved = localStorage.getItem(MODE_KEY)
+                if (saved === 'history' || saved === 'eco') mode = saved
+            } catch (e) {}
+            apply(mode)
+
+            btn.addEventListener('click', () => {
+                const currentIsHistory = document.body.classList.contains('mode-history')
+                const nextMode = currentIsHistory ? 'eco' : 'history'
+                try { localStorage.setItem(MODE_KEY, nextMode) } catch (e) {}
+                apply(nextMode)
+                const hash = nextMode === 'history' ? '#history-knowledge' : ''
+                window.location.href = 'index.html' + hash
+            })
+
+            window.addEventListener('storage', (e) => {
+                if (e.key !== MODE_KEY || !e.newValue) return
+                if (e.newValue === 'history' || e.newValue === 'eco') apply(e.newValue)
+            })
+        })()
+        
+        // Обновление статистики на странице новостей
+        function updateStats() {
+            try {
+                // Пытаемся загрузить данные из localStorage (если они там есть)
+                const savedClean = localStorage.getItem('customCleanPlaces');
+                const savedDirty = localStorage.getItem('customDirtyPlaces');
+                
+                let cleanCount = 11; // Базовое количество из JSON
+                let dirtyCount = 12; // Базовое количество из JSON
+                
+                if (savedClean) {
+                    const customClean = JSON.parse(savedClean);
+                    cleanCount += customClean.length;
+                }
+                
+                if (savedDirty) {
+                    const customDirty = JSON.parse(savedDirty);
+                    dirtyCount += customDirty.length;
+                }
+                
+                const statCleanEl = document.getElementById('statClean');
+                const statDirtyEl = document.getElementById('statDirty');
+                
+                if (statCleanEl) {
+                    animateStat(statCleanEl, cleanCount);
+                }
+                if (statDirtyEl) {
+                    animateStat(statDirtyEl, dirtyCount);
+                }
+            } catch (e) {
+                console.error('Ошибка обновления статистики:', e);
+            }
+        }
+        
+        function animateStat(element, target) {
+            const start = parseInt(element.textContent) || 0;
+            const duration = 800;
+            const startTime = performance.now();
+            
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                const current = Math.round(start + (target - start) * easeOut);
+                element.textContent = current;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    element.textContent = target;
+                }
+            }
+            
+            requestAnimationFrame(update);
+        }
+        
+        function initNewsTabs() {
+            const buttons = document.querySelectorAll('.news-tab-btn');
+            const panels = document.querySelectorAll('.news-tab-panel');
+            const STORAGE_KEY = 'bryanskNewsActiveTab';
+
+            function activate(target) {
+                if (!target) return
+                const panel = document.getElementById('tab-' + target);
+                if (!panel) return
+
+                buttons.forEach((b) => b.classList.remove('active'));
+                panels.forEach((p) => p.classList.remove('active'));
+                const btn = document.querySelector('.news-tab-btn[data-tab="' + target + '"]');
+                if (btn) btn.classList.add('active');
+                panel.classList.add('active');
+            }
+
+            // restore (и синхронизация между вкладками)
+            let savedTab = null;
+            try { savedTab = localStorage.getItem(STORAGE_KEY) } catch (e) {}
+            const initialTab = savedTab || document.querySelector('.news-tab-btn.active')?.getAttribute('data-tab');
+            activate(initialTab);
+
+            buttons.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const target = btn.getAttribute('data-tab');
+                    activate(target);
+                    try { localStorage.setItem(STORAGE_KEY, target) } catch (e) {}
+                });
+            });
+
+            window.addEventListener('storage', (e) => {
+                if (e.key !== STORAGE_KEY || !e.newValue) return
+                activate(e.newValue);
+            });
+        }
+        
+        // Запуск после загрузки страницы
+        function initNewsPage() {
+            updateStats();
+            initNewsTabs();
+            var subForm = document.getElementById('newsSubscribeForm');
+            if (subForm) {
+                subForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var em = document.getElementById('subscribeEmail');
+                    var st = document.getElementById('subscribeStatus');
+                    if (em && em.checkValidity && !em.checkValidity()) {
+                        em.reportValidity();
+                        return;
+                    }
+                    if (st) {
+                        st.textContent = em && em.value
+                            ? 'Спасибо! В демо-версии письмо не отправляется — вы указали: ' + em.value
+                            : 'Укажите корректный e-mail.';
+                    }
+                });
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initNewsPage);
+        } else {
+            initNewsPage();
+        }
+    </script>
+</body>
+</html>
+
